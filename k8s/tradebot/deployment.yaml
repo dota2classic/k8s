@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tradebot
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tradebot
+  template:
+    metadata:
+      labels:
+        app: tradebot
+    spec:
+      containers:
+        - name: tradebot
+          image: dota2classic/tradebot:k8s-latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 6100
+
+          envFrom:
+            - secretRef:
+                name: shared-secrets
+          env:
+            - name: APP_NAME
+              value: "tradebot"
+            - name: MARKET_RATE_LIMIT_PER_MINUTE
+              value: "20"
+            - name: DO_TRADE_SCRAPES
+              value: "false"
+            - name: NODE_ENV
+              value: "production"

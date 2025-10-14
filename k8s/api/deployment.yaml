@@ -27,6 +27,8 @@ spec:
               value: "gateway"
             - name: GAMESERVER_API
               value: "http://gameserver:5003"
+            - name: TRADE_API
+              value: "http://tradebot:6100"
             - name: FORUM_API
               value: "http://forum:6009"
             - name: MATCHMAKER_API

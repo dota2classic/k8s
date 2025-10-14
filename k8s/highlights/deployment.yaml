@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: highlights
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: highlights
+  template:
+    metadata:
+      labels:
+        app: highlights
+    spec:
+      containers:
+        - name: highlights
+          image: dota2classic/highlights:k8s-latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+
+          envFrom:
+            - secretRef:
+                name: shared-secrets
+          env:
+            - name: APP_NAME
+              value: "highlights"
