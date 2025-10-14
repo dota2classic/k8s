@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+        - name: frontend
+          image: dota2classic/frontend:k8s-latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3000
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: API_URL
+              value: http://192.168.49.2/api
+            - name: SOCKET_URL
+              value: ws://192.168.49.2/newsocket
+            - name: IS_DEV_VERSION
+              value: "true"

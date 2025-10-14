@@ -27,6 +27,8 @@ spec:
               value: "gateway"
             - name: GAMESERVER_API
               value: "http://gameserver:5003"
+            - name: FORUM_API
+              value: "http://forum:6009"
             - name: MATCHMAKER_API
               value: "http://matchmaker:7777"
             - name: FRONTEND_URL

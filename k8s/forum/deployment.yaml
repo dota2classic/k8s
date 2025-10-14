@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: forum
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: forum
+  template:
+    metadata:
+      labels:
+        app: forum
+    spec:
+      containers:
+        - name: forum
+          image: dota2classic/forum:k8s-latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 6009
+
+          envFrom:
+            - secretRef:
+                name: shared-secrets
+          env:
+            - name: APP_NAME
+              value: "forum"
+            - name: NODE_ENV
+              value: "production"

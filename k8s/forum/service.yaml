@@ -1,0 +1,13 @@
+# ./k8s/gameserver/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: forum
+spec:
+  type: NodePort
+  selector:
+    app: forum
+  ports:
+    - port: 6009
+      targetPort: 6009
+      nodePort: 30010
