@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: matchmaker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: matchmaker
+  template:
+    metadata:
+      labels:
+        app: matchmaker
+    spec:
+      containers:
+        - name: matchmaker
+          image: dota2classic/matchmaker:k8s-latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 7777
+
+          envFrom:
+            - secretRef:
+                name: shared-secrets
+          env:
+            - name: APP_NAME
+              value: "gateway"
+            - name: NODE_ENV
+              value: "production"

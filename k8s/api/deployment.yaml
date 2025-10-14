@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: api
+  template:
+    metadata:
+      labels:
+        app: api
+    spec:
+      containers:
+        - name: api
+          image: dota2classic/gateway:k8s-latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 6001
+
+          envFrom:
+            - secretRef:
+                name: shared-secrets
+          env:
+            - name: APP_NAME
+              value: "gateway"
+            - name: GAMESERVER_API
+              value: "http://gameserver:5003"
+            - name: MATCHMAKER_API
+              value: "http://matchmaker:7777"
+            - name: FRONTEND_URL
+              value: "http://localhost:3000"
+            - name: BACKEND_URL
+              value: "http://localhost:6001"
+            - name: NODE_ENV
+              value: "production"

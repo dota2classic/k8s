@@ -1,0 +1,13 @@
+# ./k8s/gameserver/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: matchmaker
+spec:
+  type: NodePort
+  selector:
+    app: matchmaker
+  ports:
+    - port: 7777
+      targetPort: 7777
+      nodePort: 30008

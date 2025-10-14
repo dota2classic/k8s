@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gameserver
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gameserver
+  template:
+    metadata:
+      labels:
+        app: gameserver
+    spec:
+      containers:
+        - name: gameserver
+          image: dota2classic/gameserver:k8s
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 5003
+
+          envFrom:
+            - secretRef:
+                name: shared-secrets
+          env:
+            - name: APP_NAME
+              value: "gameserver"
+            - name: NODE_ENV
+              value: "production"

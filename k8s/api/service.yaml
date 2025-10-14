@@ -1,0 +1,13 @@
+# ./k8s/gameserver/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: api
+spec:
+  type: NodePort
+  selector:
+    app: api
+  ports:
+    - port: 6001
+      targetPort: 6001
+      nodePort: 30005

@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: user
+  template:
+    metadata:
+      labels:
+        app: user
+    spec:
+      containers:
+        - name: user
+          image: dota2classic/user:k8s-latest
+          imagePullPolicy: Always
+#          ports:
+#            - containerPort: 7777
+
+          envFrom:
+            - secretRef:
+                name: shared-secrets
+          env:
+            - name: APP_NAME
+              value: "user"
+            - name: NODE_ENV
+              value: "production"

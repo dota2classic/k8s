@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: fluentbit
+spec:
+  selector:
+    app: fluentbit
+  ports:
+    - name: forward
+      protocol: TCP
+      port: 24224
+      targetPort: 24224

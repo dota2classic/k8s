@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      containers:
+        - name: redis
+          image: redis:7.4.0-alpine
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              apk add --no-cache gettext >/dev/null
+              envsubst < /etc/redis/redis.conf.template > /tmp/redis.conf
+              exec redis-server /tmp/redis.conf
+          envFrom:
+            - secretRef:
+                name: shared-secrets
+          ports:
+            - containerPort: 6379
+          volumeMounts:
+            - name: redis-config
+              mountPath: /etc/redis/redis.conf.template
+              subPath: redis.conf
+            - name: redis-data
+              mountPath: /data
+      volumes:
+        - name: redis-config
+          configMap:
+            name: redis-config
+        - name: redis-data
+          emptyDir: {}
