@@ -22,8 +22,8 @@ spec:
             - name: NODE_ENV
               value: "production"
             - name: API_URL
-              value: http://192.168.49.2/api
+              value: http://api.minilocal.ru
             - name: SOCKET_URL
-              value: ws://192.168.49.2/newsocket
+              value: ws://api.minilocal.ru/newsocket
             - name: IS_DEV_VERSION
               value: "true"

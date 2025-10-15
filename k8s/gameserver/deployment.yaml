@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: gameserver
-          image: dota2classic/gameserver:k8s
+          image: dota2classic/gameserver:k8s-latest
           imagePullPolicy: Always
           ports:
             - containerPort: 5003
