@@ -4,7 +4,7 @@ metadata:
   name: wiki-ingress
   annotations:
     nginx.ingress.kubernetes.io/use-regex: "true"  # optional
-    cert-manager.io/cluster-issuer: "selfsigned"
+    cert-manager.io/cluster-issuer: ${CERT_ISSUER}
 spec:
   rules:
     - host: wiki.${HOST}

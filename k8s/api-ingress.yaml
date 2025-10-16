@@ -4,7 +4,7 @@ metadata:
   name: api-ingress
   annotations:
     nginx.ingress.kubernetes.io/use-regex: "true"
-    cert-manager.io/cluster-issuer: "selfsigned"
+    cert-manager.io/cluster-issuer: ${CERT_ISSUER}
 spec:
   rules:
     - host: api.${HOST}
