@@ -8,10 +8,12 @@ if [ ! -f "$ENV_FILE" ]; then
   exit 1
 fi
 
+# Export environment variables from file
 export $(grep -v '^#' "$ENV_FILE" | xargs)
 
-for file in k8s/*.yaml; do
-  echo "Applying $(basename $file)..."
+# Find all .yaml files recursively under k8s/
+find k8s -type f -name '*.yaml' | while read -r file; do
+  echo "Applying $file..."
   envsubst < "$file" | kubectl apply -f -
 done
 
