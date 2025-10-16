@@ -6,6 +6,10 @@ metadata:
     nginx.ingress.kubernetes.io/use-regex: "true"  # optional
     cert-manager.io/cluster-issuer: ${CERT_ISSUER}
 spec:
+  tls:
+    - hosts:
+        - wiki.${HOST}
+      secretName: wiki-tls
   rules:
     - host: wiki.${HOST}
       http:
