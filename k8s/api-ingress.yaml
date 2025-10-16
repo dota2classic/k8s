@@ -3,7 +3,8 @@ kind: Ingress
 metadata:
   name: api-ingress
   annotations:
-    nginx.ingress.kubernetes.io/use-regex: "true"  # optional
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    cert-manager.io/cluster-issuer: "selfsigned"
 spec:
   rules:
     - host: api.minilocal.ru

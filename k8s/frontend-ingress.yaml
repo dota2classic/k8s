@@ -4,6 +4,7 @@ metadata:
   name: frontend-ingress
   annotations:
     nginx.ingress.kubernetes.io/use-regex: "true"  # optional
+    cert-manager.io/cluster-issuer: "selfsigned"
 spec:
   rules:
     - host: minilocal.ru

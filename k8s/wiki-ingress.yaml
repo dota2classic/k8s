@@ -4,6 +4,7 @@ metadata:
   name: wiki-ingress
   annotations:
     nginx.ingress.kubernetes.io/use-regex: "true"  # optional
+    cert-manager.io/cluster-issuer: "selfsigned"
 spec:
   rules:
     - host: wiki.minilocal.ru
