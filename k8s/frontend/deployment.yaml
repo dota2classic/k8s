@@ -22,10 +22,10 @@ spec:
             - name: NODE_ENV
               value: "production"
             - name: API_URL
-              value: https://api.minilocal.ru
+              value: https://api.${HOST}
             - name: INTERNAL_API_URL
               value: http://api:6001
             - name: SOCKET_URL
-              value: wss://api.minilocal.ru
+              value: wss://api.${HOST}
             - name: IS_DEV_VERSION
               value: "true"

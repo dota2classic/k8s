@@ -7,7 +7,7 @@ metadata:
     cert-manager.io/cluster-issuer: "selfsigned"
 spec:
   rules:
-    - host: minilocal.ru
+    - host: ${HOST}
       http:
         paths:
           - path: /
@@ -17,7 +17,7 @@ spec:
                 name: frontend
                 port:
                   number: 3000
-    - host: en.minilocal.ru
+    - host: en.${HOST}
       http:
         paths:
           - path: /
