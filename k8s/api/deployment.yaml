@@ -35,7 +35,9 @@ spec:
               value: "http://matchmaker:7777"
             - name: FRONTEND_URL
               value: "http://minilocal.ru"
+            - name: BASE_DOMAIN
+              value: "minilocal.ru"
             - name: BACKEND_URL
               value: "http://api.minilocal.ru"
             - name: NODE_ENV
-              value: "production"
+              value: "dev"
