@@ -34,10 +34,10 @@ spec:
             - name: MATCHMAKER_API
               value: "http://matchmaker:7777"
             - name: FRONTEND_URL
-              value: "http://minilocal.ru"
+              value: ${HOST}
             - name: BASE_DOMAIN
-              value: "minilocal.ru"
+              value: ${HOST}
             - name: BACKEND_URL
-              value: "http://api.minilocal.ru"
+              value: "http://api.${HOST}"
             - name: NODE_ENV
               value: "dev"
