@@ -3,7 +3,7 @@ kind: Service
 metadata:
   name: wiki
 spec:
-  type: NodePort
+  type: ClusterIP
   selector:
     app: wiki
   ports:
