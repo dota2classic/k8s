@@ -16,6 +16,14 @@ spec:
         - name: wiki
           image: dota2classic/wiki:k8s-latest
           imagePullPolicy: Always
+
+          resources:
+            requests:
+              cpu: 100m       # Pod asks for 0.25 CPU
+              memory: 64Mi
+            limits:
+              cpu: 250m       # Pod can use up to 0.5 CPU
+              memory: 128Mi
           ports:
             - containerPort: 3000
           env:

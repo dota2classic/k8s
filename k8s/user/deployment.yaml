@@ -16,8 +16,14 @@ spec:
         - name: user
           image: dota2classic/user:k8s-latest
           imagePullPolicy: Always
-#          ports:
-#            - containerPort: 7777
+
+          resources:
+            requests:
+              cpu: 100m       # Pod asks for 0.25 CPU
+              memory: 64Mi
+            limits:
+              cpu: 300m       # Pod can use up to 0.5 CPU
+              memory: 128Mi
 
           envFrom:
             - secretRef:

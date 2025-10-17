@@ -19,6 +19,14 @@ spec:
           ports:
             - containerPort: 7777
 
+          resources:
+            requests:
+              cpu: 250m       # Pod asks for 0.25 CPU
+              memory: 256Mi
+            limits:
+              cpu: 500m       # Pod can use up to 0.5 CPU
+              memory: 512Mi
+
           envFrom:
             - secretRef:
                 name: shared-secrets
