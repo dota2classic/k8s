@@ -1,31 +1,31 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: user
+  name: matchmaker
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: user
+      app: matchmaker
   template:
     metadata:
       labels:
-        app: user
+        app: matchmaker
     spec:
       containers:
-        - name: user
-          image: dota2classic/user:k8s-latest
+        - name: matchmaker
+          image: dota2classic/matchmaker:k8s-latest
           imagePullPolicy: Always
-#          ports:
-#            - containerPort: 7777
+          ports:
+            - containerPort: 7777
 
           envFrom:
             - secretRef:
                 name: shared-secrets
           env:
             - name: APP_NAME
-              value: "user"
-            - name: GAMESERVER_API
-              value: "http://gameserver:5003"
+              value: "gateway"
             - name: NODE_ENV
               value: "production"
+            - name: GAMESERVER_API
+              value: "http://gameserver:5003"
