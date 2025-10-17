@@ -4,10 +4,9 @@ kind: Service
 metadata:
   name: tradebot
 spec:
-  type: NodePort
+  type: ClusterIP
   selector:
     app: tradebot
   ports:
     - port: 6100
       targetPort: 6100
-      nodePort: 30038

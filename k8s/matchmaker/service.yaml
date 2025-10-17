@@ -4,10 +4,9 @@ kind: Service
 metadata:
   name: matchmaker
 spec:
-  type: NodePort
+  type: ClusterIP
   selector:
     app: matchmaker
   ports:
     - port: 7777
       targetPort: 7777
-      nodePort: 30008
