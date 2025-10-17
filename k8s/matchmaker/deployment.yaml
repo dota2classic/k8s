@@ -25,5 +25,7 @@ spec:
           env:
             - name: APP_NAME
               value: "user"
+            - name: GAMESERVER_API
+              value: "http://gameserver:5003"
             - name: NODE_ENV
               value: "production"
