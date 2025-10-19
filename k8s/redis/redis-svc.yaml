@@ -4,6 +4,7 @@ metadata:
   name: redis
 spec:
   type: NodePort
+  clusterIP: None
   selector:
     app: redis
   ports:
