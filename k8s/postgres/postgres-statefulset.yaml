@@ -17,6 +17,10 @@ spec:
       containers:
         - name: postgres
           image: postgres:16.4-bookworm
+          resources:
+            requests:
+              cpu: 1000m
+              memory: 1Gi
           ports:
             - containerPort: 5432
               name: postgres
@@ -34,6 +38,4 @@ spec:
         storageClassName: local-path
         resources:
           requests:
-            cpu: 1000m
-            memory: 1Gi
             storage: 5Gi
