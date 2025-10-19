@@ -31,7 +31,7 @@ spec:
           ports:
             - containerPort: 6379
           volumeMounts:
-            - name: redis-data
+            - name: data
               mountPath: /data
   volumeClaimTemplates:
     - metadata:
