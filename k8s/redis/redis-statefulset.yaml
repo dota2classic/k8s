@@ -2,13 +2,12 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: redis
-  namespace: default
 spec:
-  serviceName: redis
-  replicas: 1
   selector:
     matchLabels:
       app: redis
+  serviceName: redis
+  replicas: 1
   template:
     metadata:
       labels:
