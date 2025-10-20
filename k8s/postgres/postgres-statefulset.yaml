@@ -30,6 +30,16 @@ spec:
           volumeMounts:
             - name: data
               mountPath: /var/lib/postgresql/data
+            - name: config
+              mountPath: /etc/postgresql/postgresql.conf
+              subPath: postgresql.conf
+          args:
+            - "-c"
+            - "config_file=/etc/postgresql/postgresql.conf"
+      volumes:
+        - name: config
+          configMap:
+            name: postgres-config
   volumeClaimTemplates:
     - metadata:
         name: data
