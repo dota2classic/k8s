@@ -6,9 +6,9 @@ metadata:
 spec:
   type: NodePort
   selector:
-    app: postgress
+    app: postgres
   ports:
     - name: postgres
-      port: 5432        # Redis port inside cluster
+      port: 5432        # Postgres port inside cluster
       targetPort: 5432
       nodePort: 30555   # Port on the node
