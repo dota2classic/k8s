@@ -3,6 +3,10 @@ kubectl create namespace monitoring
 helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 helm repo update
 
+# Setup helm
+export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
+
+
 # Install only node-exporter and prometheus.
 helm install prometheus prometheus-community/kube-prometheus-stack \
   --namespace monitoring \
