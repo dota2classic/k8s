@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: paymentbot
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: paymentbot
+  template:
+    metadata:
+      labels:
+        app: paymentbot
+    spec:
+      containers:
+        - name: paymentbot
+          image: dota2classic/payment:k8s-latest
+          imagePullPolicy: Always
+
+          envFrom:
+            - secretRef:
+                name: shared-secrets
+          env:
+            - name: APP_NAME
+              value: "paymentbot"
+            - name: NODE_ENV
+              value: "production"
