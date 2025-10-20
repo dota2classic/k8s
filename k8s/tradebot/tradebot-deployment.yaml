@@ -27,7 +27,5 @@ spec:
               value: "tradebot"
             - name: MARKET_RATE_LIMIT_PER_MINUTE
               value: "20"
-            - name: DO_TRADE_SCRAPES
-              value: "true"
             - name: NODE_ENV
               value: "production"
