@@ -9,6 +9,9 @@ spec:
     matchLabels:
       app: postgres-backup
   template:
+    metadata:
+      labels:
+        app: user
     spec:
       containers:
         - name: postgres-backup
