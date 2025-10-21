@@ -2,7 +2,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: postgres-backup
-  namespace: default
 spec:
   replicas: 1
   selector:
@@ -11,7 +10,7 @@ spec:
   template:
     metadata:
       labels:
-        app: user
+        app: postgres-backup
     spec:
       containers:
         - name: postgres-backup
