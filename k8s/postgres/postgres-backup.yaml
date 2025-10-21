@@ -15,7 +15,7 @@ spec:
       containers:
         - name: postgres-backup
           image: eeshugerman/postgres-backup-s3:16
-          restartPolicy: Always
+
           envFrom:
             - secretRef:
                 name: shared-secrets
