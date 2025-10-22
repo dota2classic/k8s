@@ -12,7 +12,7 @@ helm install prometheus prometheus-community/kube-prometheus-stack \
   --namespace monitoring \
   --set grafana.enabled=false \
   --set alertmanager.enabled=false \
-  --set kubeStateMetrics.enabled=false \
+  --set kubeStateMetrics.enabled=true \
   --set prometheus.prometheusSpec.serviceMonitorSelectorNilUsesHelmValues=false \
   --set prometheus.prometheusSpec.podMonitorSelectorNilUsesHelmValues=false \
   --set prometheusAdapter.enabled=false \
