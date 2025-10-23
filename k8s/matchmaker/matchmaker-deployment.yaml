@@ -32,7 +32,7 @@ spec:
                 name: shared-secrets
           env:
             - name: APP_NAME
-              value: "gateway"
+              value: "matchmaker"
             - name: NODE_ENV
               value: "production"
             - name: GAMESERVER_API
