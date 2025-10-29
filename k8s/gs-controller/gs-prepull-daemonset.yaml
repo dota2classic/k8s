@@ -13,10 +13,10 @@ spec:
         app: prepull-gameserver
     spec:
       containers:
-        - name: prepull
+        - name: prepull-sidecar
           image: dota2classic/srcds-sidecar:k8s-latest
           command: ["sleep", "infinity"]  # keeps Pod alive
-        - name: prepull
+        - name: prepull-gameserver
           image: dota2classic/srcds:d684_dev-k8s-latest
           command: [ "sleep", "infinity" ]  # keeps Pod alive
       restartPolicy: Always
