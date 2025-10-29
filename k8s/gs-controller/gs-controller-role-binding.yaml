@@ -1,0 +1,13 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: gs-controller-rolebinding
+  namespace: default
+subjects:
+  - kind: ServiceAccount
+    name: gs-controller-sa
+    namespace: default
+roleRef:
+  kind: Role
+  name: gs-controller-role
+  apiGroup: rbac.authorization.k8s.io

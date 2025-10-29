@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gs-controller
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gs-controller
+  template:
+    metadata:
+      labels:
+        app: gs-controller
+        prometheus-scrape: "true"
+    spec:
+      serviceAccountName: gs-controller-sa
+      containers:
+        - name: gs-controller
+          image: dota2classic/gs-controller:k8s-latest
+          imagePullPolicy: Always
+
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi
+
+          envFrom:
+            - secretRef:
+                name: shared-secrets
+          env:
+            - name: GAMESERVER_EXPIRATION_TIMEOUT
+              value: "2m"
+            - name: POD_CHECK_INTERVAL
+              value: "30s"
+            - name: APP_NAME
+              value: "gs-controller"
+
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10

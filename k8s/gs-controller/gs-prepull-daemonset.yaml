@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: prepull-gameserver
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: prepull-gameserver
+  template:
+    metadata:
+      labels:
+        app: prepull-gameserver
+    spec:
+      containers:
+        - name: prepull
+          image: dota2classic/srcds-sidecar:k8s-latest
+          command: ["sleep", "infinity"]  # keeps Pod alive
+        - name: prepull
+          image: dota2classic/srcds:d684_dev-k8s-latest
+          command: [ "sleep", "infinity" ]  # keeps Pod alive
+      restartPolicy: Always
+      nodeSelector:
+        gs-node: "true"  # optional: only nodes that run gameservers
