@@ -1,0 +1,26 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: prepull-gameserver
+  namespace: default
+spec:
+  schedule: "*/5 * * * *"  # every 5 minutes
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          nodeSelector:
+            gs-node: "true"  # schedule on high-cpu nodes
+          tolerations:
+            - effect: NoSchedule
+              operator: Exists
+          restartPolicy: OnFailure
+          containers:
+            - name: prepull-sidecar
+              image: dota2classic/srcds-sidecar:k8s-latest
+              imagePullPolicy: Always
+              command: ["sh", "-c", "echo Pulled sidecar image"]
+            - name: prepull-gameserver
+              image: dota2classic/srcds:d684_dev-k8s-latest
+              imagePullPolicy: Always
+              command: ["sh", "-c", "echo Pulled gameserver image"]
