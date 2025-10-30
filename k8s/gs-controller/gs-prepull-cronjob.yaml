@@ -10,7 +10,7 @@ spec:
       template:
         spec:
           nodeSelector:
-            gs-node: "true"  # schedule on high-cpu nodes
+            node-type: "gameserver"
           tolerations:
             - effect: NoSchedule
               operator: Exists
