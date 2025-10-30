@@ -14,9 +14,11 @@ spec:
     spec:
       containers:
         - name: prepull-sidecar
+          imagePullPolicy: Always
           image: dota2classic/srcds-sidecar:k8s-latest
           command: ["sleep", "infinity"]  # keeps Pod alive
         - name: prepull-gameserver
+          imagePullPolicy: Always
           image: dota2classic/srcds:d684_dev-k8s-latest
           command: [ "sleep", "infinity" ]  # keeps Pod alive
       restartPolicy: Always
