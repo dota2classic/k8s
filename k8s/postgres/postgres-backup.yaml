@@ -29,7 +29,10 @@ spec:
             - name: S3_BUCKET
               value: "backup"
             - name: S3_PREFIX
-              value: "backup"
+              valueFrom:
+                secretKeyRef:
+                  name: shared-secrets
+                  key: S3_PG_BACKUP_PREFIX
             - name: S3_ENDPOINT
               valueFrom:
                 secretKeyRef:
