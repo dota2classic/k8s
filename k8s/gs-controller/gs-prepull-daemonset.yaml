@@ -17,13 +17,13 @@ spec:
       tolerations:
         - effect: NoSchedule
           operator: Exists
-      restartPolicy: OnFailure
+      restartPolicy: Always
       containers:
         - name: prepull-sidecar
           imagePullPolicy: Always
           image: dota2classic/srcds-sidecar:k8s-latest
-          command: ["sh", "-c", "echo Pulled sidecar image && sleep 10"]
+          command: ["sh", "-c", "echo Pulled sidecar image && sleep 30"]
         - name: prepull-gameserver
           imagePullPolicy: Always
           image: dota2classic/srcds:d684_dev-k8s-latest
-          command: ["sh", "-c", "echo Pulled gameserver image && sleep 10"]
+          command: ["sh", "-c", "echo Pulled gameserver image && sleep 180"]
