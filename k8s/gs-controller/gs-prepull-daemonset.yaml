@@ -12,15 +12,18 @@ spec:
       labels:
         app: prepull-gameserver
     spec:
+      nodeSelector:
+        gs-node: "true"
+      tolerations:
+        - effect: NoSchedule
+          operator: Exists
+      restartPolicy: OnFailure
       containers:
         - name: prepull-sidecar
           imagePullPolicy: Always
           image: dota2classic/srcds-sidecar:k8s-latest
-          command: ["sleep", "infinity"]  # keeps Pod alive
+          command: ["sh", "-c", "echo Pulled sidecar image && sleep 10"]
         - name: prepull-gameserver
           imagePullPolicy: Always
           image: dota2classic/srcds:d684_dev-k8s-latest
-          command: [ "sleep", "infinity" ]  # keeps Pod alive
-      restartPolicy: Always
-      nodeSelector:
-        gs-node: "true"  # optional: only nodes that run gameservers
+          command: ["sh", "-c", "echo Pulled gameserver image && sleep 10"]
