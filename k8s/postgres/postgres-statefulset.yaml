@@ -14,15 +14,8 @@ spec:
       labels:
         app: postgres
     spec:
-#      nodeSelector:
-#        node-type: "infra"
       nodeSelector:
-        node-type: "gameserver"
-      tolerations:
-        - key: "dedicated"
-          operator: "Equal"
-          value: "gameserver"
-          effect: "NoSchedule"
+        node-type: "infra"
       containers:
         - name: postgres
           image: postgres:16.4-bookworm
