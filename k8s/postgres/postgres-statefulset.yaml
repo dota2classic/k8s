@@ -46,8 +46,6 @@ spec:
     - metadata:
         name: data
       spec:
-      nodeSelector:
-        node-type: "infra"
         accessModes: ["ReadWriteOnce"]
         storageClassName: local-path
         resources:
