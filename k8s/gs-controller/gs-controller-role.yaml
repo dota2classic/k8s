@@ -2,7 +2,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: gs-controller-role
-  namespace: default
+  namespace: gameservers
 rules:
   - apiGroups: [""]
     resources: ["configmaps", "pods", "secrets"]
