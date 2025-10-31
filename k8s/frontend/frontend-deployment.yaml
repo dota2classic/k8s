@@ -12,6 +12,8 @@ spec:
       labels:
         app: frontend
     spec:
+      nodeSelector:
+        node-type: "infra"
       containers:
         - name: frontend
           image: dota2classic/frontend:k8s-latest

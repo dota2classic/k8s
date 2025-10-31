@@ -12,6 +12,8 @@ spec:
       labels:
         app: tradebot
     spec:
+      nodeSelector:
+        node-type: "infra"
       containers:
         - name: tradebot
           image: dota2classic/tradebot:k8s-latest

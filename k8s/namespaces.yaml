@@ -1,0 +1,12 @@
+# Namespace for gameservers
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: gameserver
+
+---
+# Namespace for site pods
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: infra

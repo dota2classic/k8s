@@ -12,6 +12,8 @@ spec:
       labels:
         app: fluentbit
     spec:
+      nodeSelector:
+        node-type: "infra"
       containers:
         - name: fluentbit
           image: fluent/fluent-bit:3.1

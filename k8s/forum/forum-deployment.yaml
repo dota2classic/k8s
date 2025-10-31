@@ -12,6 +12,8 @@ spec:
       labels:
         app: forum
     spec:
+      nodeSelector:
+        node-type: "infra"
       containers:
         - name: forum
           image: dota2classic/forum:k8s-latest

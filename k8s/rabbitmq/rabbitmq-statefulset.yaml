@@ -13,6 +13,8 @@ spec:
       labels:
         app: rabbitmq
     spec:
+      nodeSelector:
+        node-type: "infra"
       containers:
         - name: rabbitmq
           image: rabbitmq:3.13-management
@@ -29,6 +31,8 @@ spec:
     - metadata:
         name: data
       spec:
+      nodeSelector:
+        node-type: "infra"
         accessModes: ["ReadWriteOnce"]
         storageClassName: local-path
         resources:

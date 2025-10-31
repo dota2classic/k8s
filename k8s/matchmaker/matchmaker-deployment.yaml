@@ -12,6 +12,8 @@ spec:
       labels:
         app: matchmaker
     spec:
+      nodeSelector:
+        node-type: "infra"
       containers:
         - name: matchmaker
           image: dota2classic/matchmaker:k8s-latest

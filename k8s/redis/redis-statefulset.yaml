@@ -13,6 +13,8 @@ spec:
       labels:
         app: redis
     spec:
+      nodeSelector:
+        node-type: "infra"
       containers:
         - name: redis
           image: redis:7.4.0-alpine
@@ -37,6 +39,8 @@ spec:
     - metadata:
         name: data
       spec:
+      nodeSelector:
+        node-type: "infra"
         accessModes: ["ReadWriteOnce"]
         storageClassName: local-path
         resources:

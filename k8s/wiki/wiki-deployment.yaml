@@ -12,6 +12,8 @@ spec:
       labels:
         app: wiki
     spec:
+      nodeSelector:
+        node-type: "infra"
       containers:
         - name: wiki
           image: dota2classic/wiki:k8s-latest

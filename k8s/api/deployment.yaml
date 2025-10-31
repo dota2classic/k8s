@@ -13,6 +13,8 @@ spec:
         app: api
         prometheus-scrape: "true"
     spec:
+      nodeSelector:
+        node-type: "infra"
       containers:
         - name: api
           image: dota2classic/gateway:k8s-latest

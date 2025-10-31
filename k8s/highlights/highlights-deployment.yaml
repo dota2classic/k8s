@@ -12,6 +12,8 @@ spec:
       labels:
         app: highlights
     spec:
+      nodeSelector:
+        node-type: "infra"
       containers:
         - name: highlights
           image: dota2classic/highlights:k8s-latest

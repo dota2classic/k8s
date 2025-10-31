@@ -14,6 +14,8 @@ spec:
       labels:
         app: postgres
     spec:
+      nodeSelector:
+        node-type: "infra"
       containers:
         - name: postgres
           image: postgres:16.4-bookworm
@@ -44,6 +46,8 @@ spec:
     - metadata:
         name: data
       spec:
+      nodeSelector:
+        node-type: "infra"
         accessModes: ["ReadWriteOnce"]
         storageClassName: local-path
         resources:

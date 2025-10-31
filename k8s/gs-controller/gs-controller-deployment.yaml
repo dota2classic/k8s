@@ -13,6 +13,8 @@ spec:
         app: gs-controller
         prometheus-scrape: "true"
     spec:
+      nodeSelector:
+        node-type: "infra"
       serviceAccountName: gs-controller-sa
       containers:
         - name: gs-controller
