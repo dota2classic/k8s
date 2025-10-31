@@ -3,6 +3,8 @@ kind: CronJob
 metadata:
   name: prepull-gameserver
   namespace: gameservers
+  labels:
+    app-type: gameserver
 spec:
   schedule: "*/5 * * * *"  # every 5 minutes
   jobTemplate:
