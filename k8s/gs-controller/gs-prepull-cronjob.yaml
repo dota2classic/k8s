@@ -6,7 +6,7 @@ metadata:
   labels:
     app-type: gameserver
 spec:
-  schedule: "*/5 * * * *"  # every 5 minutes
+  schedule: "*/1 * * * *"  # every 1 minute
   jobTemplate:
     spec:
       ttlSecondsAfterFinished: 60
