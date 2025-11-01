@@ -9,6 +9,7 @@ spec:
   schedule: "*/1 * * * *"  # every hour
   jobTemplate:
     spec:
+      ttlSecondsAfterFinished: 60
       template:
         spec:
           hostPID: true
