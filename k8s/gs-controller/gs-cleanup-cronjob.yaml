@@ -6,7 +6,7 @@ metadata:
   labels:
     app-type: gameserver
 spec:
-  schedule: "0/1 * * * *"  # every hour
+  schedule: "*/1 * * * *"  # every hour
   jobTemplate:
     spec:
       template:
