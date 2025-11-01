@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: prepull-gameserver
+  name: cleanup-gameserver
   namespace: gameservers
   labels:
     app-type: gameserver
@@ -12,12 +12,12 @@ spec:
       template:
         spec:
           hostPID: true
-          restartPolicy: OnFailure
+          nodeSelector:
+            node-type: "gameserver"
           tolerations:
             - effect: NoSchedule
               operator: Exists
-          nodeSelector:
-            node-type: "gameserver"
+          restartPolicy: OnFailure
           containers:
             - name: cleanup
               image: alpine:3.20
