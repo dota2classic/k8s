@@ -1,0 +1,51 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: prepull-gameserver
+  namespace: gameservers
+  labels:
+    app-type: gameserver
+spec:
+  schedule: "0/1 * * * *"  # every hour
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          hostPID: true
+          restartPolicy: OnFailure
+          tolerations:
+            - effect: NoSchedule
+              operator: Exists
+          nodeSelector:
+            node-type: "gameserver"
+          containers:
+            - name: cleanup
+              image: alpine:3.20
+              securityContext:
+                privileged: true
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  echo "[containerd-cleanup] Starting at $(date)"
+
+                  # K3s containerd cleanup
+                  if command -v k3s >/dev/null 2>&1; then
+                    k3s ctr cleanup || true
+                  fi
+
+                  # containerd cleanup (general)
+                  if command -v ctr >/dev/null 2>&1; then
+                    ctr cleanup || true
+                    ctr images prune || true
+                    ctr snapshots prune || true
+                  fi
+
+                  echo "[containerd-cleanup] Done at $(date)"
+              volumeMounts:
+                - name: var-lib-rancher
+                  mountPath: /var/lib/rancher
+          volumes:
+            - name: var-lib-rancher
+              hostPath:
+                path: /var/lib/rancher
