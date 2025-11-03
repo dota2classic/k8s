@@ -13,11 +13,11 @@ spec:
       template:
         spec:
           hostPID: true
-          nodeSelector:
-            node-type: "gameserver"
-          tolerations:
-            - effect: NoSchedule
-              operator: Exists
+#          nodeSelector:
+#            node-type: "gameserver"
+#          tolerations:
+#            - effect: NoSchedule
+#              operator: Exists
           restartPolicy: OnFailure
           containers:
             - name: cleanup
