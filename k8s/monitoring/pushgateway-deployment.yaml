@@ -20,4 +20,4 @@ spec:
           image: prom/pushgateway:latest
           ports:
             - containerPort: 9091
-              name: pushgateway-metrics-port
+              name: pushgateway
