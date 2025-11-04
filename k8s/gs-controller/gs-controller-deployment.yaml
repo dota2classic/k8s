@@ -14,7 +14,7 @@ spec:
         prometheus-scrape: "true"
     spec:
       nodeSelector:
-        node-type: "infra"
+        ru.dotaclassic/nodeType: "infra"
       serviceAccountName: gs-controller-sa
       containers:
         - name: gs-controller

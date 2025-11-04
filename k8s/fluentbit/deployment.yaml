@@ -13,7 +13,7 @@ spec:
         app: fluentbit
     spec:
       nodeSelector:
-        node-type: "infra"
+        ru.dotaclassic/nodeType: "infra"
       containers:
         - name: fluentbit
           image: fluent/fluent-bit:3.1

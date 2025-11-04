@@ -13,7 +13,7 @@ spec:
         app: user
     spec:
       nodeSelector:
-        node-type: "infra"
+        ru.dotaclassic/nodeType: "infra"
       containers:
         - name: user
           image: dota2classic/user:k8s-latest

@@ -13,7 +13,7 @@ spec:
         app: forum
     spec:
       nodeSelector:
-        node-type: "infra"
+        ru.dotaclassic/nodeType: "infra"
       containers:
         - name: forum
           image: dota2classic/forum:k8s-latest

@@ -13,7 +13,7 @@ spec:
         app: frontend
     spec:
       nodeSelector:
-        node-type: "infra"
+        ru.dotaclassic/nodeType: "infra"
       containers:
         - name: frontend
           image: dota2classic/frontend:k8s-latest

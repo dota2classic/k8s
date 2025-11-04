@@ -13,7 +13,7 @@ spec:
         app: matchmaker
     spec:
       nodeSelector:
-        node-type: "infra"
+        ru.dotaclassic/nodeType: "infra"
       containers:
         - name: matchmaker
           image: dota2classic/matchmaker:k8s-latest

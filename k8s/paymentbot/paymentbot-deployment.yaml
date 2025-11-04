@@ -13,7 +13,7 @@ spec:
         app: paymentbot
     spec:
       nodeSelector:
-        node-type: "infra"
+        ru.dotaclassic/nodeType: "infra"
       containers:
         - name: paymentbot
           image: dota2classic/payment:k8s-latest

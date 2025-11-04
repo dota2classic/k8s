@@ -14,7 +14,7 @@ spec:
         prometheus-scrape: "true"
     spec:
       nodeSelector:
-        node-type: "infra"
+        ru.dotaclassic/nodeType: "infra"
       containers:
         - name: gameserver
           image: dota2classic/gameserver:k8s-latest

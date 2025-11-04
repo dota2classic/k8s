@@ -15,7 +15,7 @@ spec:
         app: postgres
     spec:
       nodeSelector:
-        node-type: "infra"
+        ru.dotaclassic/nodeType: "infra"
       containers:
         - name: postgres
           image: postgres:16.4-bookworm

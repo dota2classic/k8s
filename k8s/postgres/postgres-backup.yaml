@@ -13,7 +13,7 @@ spec:
         app: postgres-backup
     spec:
       nodeSelector:
-        node-type: "infra"
+        ru.dotaclassic/nodeType: "infra"
       containers:
         - name: postgres-backup
           image: eeshugerman/postgres-backup-s3:16
