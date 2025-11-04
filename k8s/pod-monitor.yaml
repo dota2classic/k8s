@@ -19,3 +19,6 @@ spec:
     - port: http-public
       path: /metrics
       interval: 15s
+    - port: pushgateway-metrics-port
+      path: /metrics
+      interval: 10s
