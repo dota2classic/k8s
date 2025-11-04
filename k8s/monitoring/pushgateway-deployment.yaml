@@ -12,6 +12,7 @@ spec:
     metadata:
       labels:
         app: pushgateway
+        prometheus-scrape: "true"
     spec:
       nodeSelector:
         ru.dotaclassic/nodeType: "infra"
