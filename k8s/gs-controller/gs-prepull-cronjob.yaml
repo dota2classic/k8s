@@ -6,10 +6,10 @@ metadata:
   labels:
     app-type: gameserver
 spec:
-  schedule: "*/5 * * * *"  # every 5 minutes
+  schedule: "*/1 * * * *"  # every 5 minutes
   jobTemplate:
     spec:
-      ttlSecondsAfterFinished: 60
+      ttlSecondsAfterFinished: 30
       template:
         spec:
           nodeSelector:
