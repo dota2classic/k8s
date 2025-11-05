@@ -16,19 +16,25 @@ spec:
     spec:
       nodeSelector:
         ru.dotaclassic/nodeType: "gameserver"
+      hostNetwork: true
+      hostPID: true
       containers:
         - name: prepull
+          securityContext:
+            privileged: true
           image: alpine:3
           command:
             - /bin/sh
             - -c
             - |
               while true; do
-                for img in dota2classic/srcds-sidecar:k8s-latest dota2classic/srcds:d684-latest dota2classic/srcds:d684-turbo-latest; do
-                  echo "Pulling $img..."
-                  crictl pull $img || echo "Failed to pull $img"
+                for img in dota2classic/srcds-sidecar:k8s-latest \
+                           dota2classic/srcds:d684-latest \
+                           dota2classic/srcds:d684-turbo-latest; do
+                  echo "Pulling $img on host..."
+                  ctr -n k8s.io images pull $img || echo "Failed to pull $img"
                 done
-                sleep 60
+                sleep 300
               done
           volumeMounts:
             - name: containerd-sock
