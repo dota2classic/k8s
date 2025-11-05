@@ -22,7 +22,7 @@ spec:
         - name: prepull
           securityContext:
             privileged: true
-          image: alpine:3
+          image: rancher/k3s:v1.33.5-k3s1  # includes ctr
           command:
             - /bin/sh
             - -c
