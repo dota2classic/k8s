@@ -23,9 +23,8 @@ spec:
             - /bin/sh
             - -c
             - |
-              IMAGES=("dota2classic/srcds-sidecar:k8s-latest" "dota2classic/srcds:d684-latest" "dota2classic/srcds:d684-turbo-latest")
               while true; do
-                for img in "${IMAGES[@]}"; do
+                for img in dota2classic/srcds-sidecar:k8s-latest dota2classic/srcds:d684-latest dota2classic/srcds:d684-turbo-latest; do
                   echo "Pulling $img..."
                   crictl pull $img || echo "Failed to pull $img"
                 done
