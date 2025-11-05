@@ -32,17 +32,17 @@ spec:
                            dota2classic/srcds:d684-latest \
                            dota2classic/srcds:d684-turbo-latest; do
                   echo "Pulling $img on host..."
-                  ctr -n k8s.io images pull $img || echo "Failed to pull $img"
+                  ctr  --address /run/k3s/containerd/containerd.sock -n k8s.io images pull $img || echo "Failed to pull $img"
                 done
                 sleep 300
               done
           volumeMounts:
             - name: containerd-sock
-              mountPath: /run/containerd/containerd.sock
+              mountPath: /run/k3s/containerd/containerd.sock
       volumes:
         - name: containerd-sock
           hostPath:
-            path: /run/containerd/containerd.sock
+            path: /run/k3s/containerd/containerd.sock
       tolerations:
         - effect: NoSchedule
           key: gameserver
