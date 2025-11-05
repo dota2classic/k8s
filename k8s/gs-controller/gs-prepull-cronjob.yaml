@@ -13,7 +13,7 @@ spec:
       template:
         spec:
           nodeSelector:
-            node-type: "gameserver"
+            ru.dotaclassic/nodeType: "gameserver"
           tolerations:
             - effect: NoSchedule
               operator: Exists
@@ -23,7 +23,11 @@ spec:
               image: dota2classic/srcds-sidecar:k8s-latest
               imagePullPolicy: Always
               command: ["sh", "-c", "echo Pulled sidecar image"]
-            - name: prepull-gameserver
-              image: dota2classic/srcds:d684_dev-k8s-latest
+            - name: prepull-gameserver-base
+              image: dota2classic/srcds:d684-latest
               imagePullPolicy: Always
-              command: ["sh", "-c", "echo Pulled gameserver image"]
+              command: ["sh", "-c", "echo Pulled base gameserver image"]
+            - name: prepull-gameserver-turbo
+              image: dota2classic/srcds:d684-turbo-latest
+              imagePullPolicy: Always
+              command: [ "sh", "-c", "echo Pulled turbo gameserver image" ]
