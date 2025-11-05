@@ -32,7 +32,9 @@ spec:
                            docker.io/dota2classic/srcds:d684-latest \
                            docker.io/dota2classic/srcds:d684-turbo-latest; do
                   echo "Pulling $img on host..."
-                  ctr  --address /run/k3s/containerd/containerd.sock -n k8s.io images pull $img || echo "Failed to pull $img"
+                  if ! ctr --address /run/k3s/containerd/containerd.sock -n k8s.io images pull $img > /dev/null 2>&1; then
+                    echo "Failed to pull $img"
+                  fi
                 done
                 sleep 300
               done
