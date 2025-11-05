@@ -28,9 +28,9 @@ spec:
             - -c
             - |
               while true; do
-                for img in dota2classic/srcds-sidecar:k8s-latest \
-                           dota2classic/srcds:d684-latest \
-                           dota2classic/srcds:d684-turbo-latest; do
+                for img in docker.io/dota2classic/srcds-sidecar:k8s-latest \
+                           docker.io/dota2classic/srcds:d684-latest \
+                           docker.io/dota2classic/srcds:d684-turbo-latest; do
                   echo "Pulling $img on host..."
                   ctr  --address /run/k3s/containerd/containerd.sock -n k8s.io images pull $img || echo "Failed to pull $img"
                 done
