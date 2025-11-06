@@ -37,5 +37,7 @@ spec:
           env:
             - name: APP_NAME
               value: "gameserver"
+            - name: FORUM_API
+              value: "http://forum:6009"
             - name: NODE_ENV
               value: "production"
