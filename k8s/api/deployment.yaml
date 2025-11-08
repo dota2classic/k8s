@@ -43,7 +43,7 @@ spec:
             - name: MATCHMAKER_API
               value: "http://matchmaker:7777"
             - name: FRONTEND_URL
-              value: ${HOST}
+              value: "https://${HOST}"
             - name: BASE_DOMAIN
               value: ${HOST}
             - name: BACKEND_URL
