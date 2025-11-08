@@ -47,6 +47,6 @@ spec:
             - name: BASE_DOMAIN
               value: ${HOST}
             - name: BACKEND_URL
-              value: "http://api.${HOST}"
+              value: "https://api.${HOST}"
             - name: NODE_ENV
               value: "dev"
