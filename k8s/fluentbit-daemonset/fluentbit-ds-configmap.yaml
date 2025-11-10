@@ -34,11 +34,11 @@ data:
     [OUTPUT]
         Name              loki
         Match             *
-        Url               141.105.71.200
+        Host              141.105.71.200
         Port              3100
         BatchWait         1
         BatchSize         102400
-        Labels            {job="gameserver", node="${HOSTNAME}"}
+        Labels            {job="gameserver", node="${HOSTNAME}", agent="fluent-bit"}
         LineFormat        json
         Retry_Limit       False
 
