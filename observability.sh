@@ -17,3 +17,5 @@ helm install prometheus prometheus-community/kube-prometheus-stack \
   --set prometheus.prometheusSpec.podMonitorSelectorNilUsesHelmValues=false \
   --set prometheusAdapter.enabled=false \
   --set nodeExporter.enabled=true
+
+
