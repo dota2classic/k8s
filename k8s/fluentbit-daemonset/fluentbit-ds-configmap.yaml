@@ -35,15 +35,15 @@ data:
     
     # Exclude Fluent Bit pod logs
     [FILTER]
-      Name    grep
-      Match   kube.*
-      Exclude kubernetes['namespace_name'] fluent-bit
+        Name    grep
+        Match   kube.*
+        Exclude kubernetes['namespace_name'] fluent-bit
     
     # Exclude the gameserver container logs
     [FILTER]
-      Name    grep
-      Match   kube.*
-      Exclude kubernetes['container_name'] gameserver
+        Name    grep
+        Match   kube.*
+        Exclude kubernetes['container_name'] gameserver
 
     [OUTPUT]
         Name              loki
