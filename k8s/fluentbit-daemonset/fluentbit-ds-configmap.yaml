@@ -27,11 +27,23 @@ data:
     [FILTER]
         Name                kubernetes
         Match               kube.*
-        Exclude             kubernetes['container_name'] gameserver
         Merge_Log           On
         Keep_Log            Off
         K8S-Logging.Parser  On
         K8S-Logging.Exclude Off
+
+    
+    # Exclude Fluent Bit pod logs
+    [FILTER]
+      Name    grep
+      Match   kube.*
+      Exclude kubernetes['namespace_name'] fluent-bit
+    
+    # Exclude the gameserver container logs
+    [FILTER]
+      Name    grep
+      Match   kube.*
+      Exclude kubernetes['container_name'] gameserver
 
     [OUTPUT]
         Name              loki
