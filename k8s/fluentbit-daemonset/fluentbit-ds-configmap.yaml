@@ -37,7 +37,7 @@ data:
         Match             *
         Host              141.105.71.200
         Port              3100
-        Labels            {job="fluent-bit", node="$kubernetes['host']", namespace="$kubernetes['namespace_name']", container="$kubernetes['container_name']"}
+        Labels            node=${HOSTNAME}, job=daemonset
 
 
   parsers.conf: |
