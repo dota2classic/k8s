@@ -28,15 +28,16 @@ spec:
             - -c
             - |
               while true; do
-                for img in docker.io/dota2classic/srcds-sidecar:k8s-latest \
-                           docker.io/dota2classic/srcds:d684-latest \
-                           docker.io/dota2classic/srcds:d684-turbo-latest; do
+                  for img in \
+                  docker.io/dota2classic/srcds-sidecar:k8s-latest \
+                  docker.io/dota2classic/srcds:d684-latest \
+                  docker.io/dota2classic/srcds:d684-turbo-latest; do
                   echo "Pulling $img on host..."
-                  if ! ctr --address /run/k3s/containerd/containerd.sock -n k8s.io images pull $img > /dev/null 2>&1; then
-                    echo "Failed to pull $img"
+                  if ! ctr --address /run/k3s/containerd/containerd.sock -n k8s.io images pull "$img" >/dev/null 2>&1; then
+                  echo "Failed to pull $img"
                   fi
-                done
-                sleep 300
+                  done
+                  sleep 300
               done
           volumeMounts:
             - name: containerd-sock
