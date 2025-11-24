@@ -1,0 +1,14 @@
+apiVersion: helm.cattle.io/v1
+kind: HelmChartConfig
+metadata:
+  name: traefik
+  namespace: kube-system
+spec:
+  valuesContent: |-
+    deployment:
+      podLabels:
+        traefik: ingress
+      additionalArguments: []
+      tolerations: []
+      nodeSelector:
+        traefik-node: "true"
