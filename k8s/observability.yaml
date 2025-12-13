@@ -1,0 +1,31 @@
+grafana:
+  enabled: false
+
+kubeStateMetrics:
+  enabled: true
+  nodeSelector:
+    ru.dotaclassic/nodeType: "infra"
+  tolerations:
+    - key: "node-role.kubernetes.io/control-plane"
+      operator: "Exists"
+      effect: "NoSchedule"
+
+prometheusOperator:
+  nodeSelector:
+    ru.dotaclassic/nodeType: "infra"
+  tolerations:
+    - key: "node-role.kubernetes.io/control-plane"
+      operator: "Exists"
+      effect: "NoSchedule"
+
+prometheus:
+  prometheusSpec:
+    nodeSelector:
+      ru.dotaclassic/nodeType: "infra"
+    tolerations:
+      - key: "node-role.kubernetes.io/control-plane"
+        operator: "Exists"
+        effect: "NoSchedule"
+
+  serviceMonitorSelectorNilUsesHelmValues: false
+  podMonitorSelectorNilUsesHelmValues: false
