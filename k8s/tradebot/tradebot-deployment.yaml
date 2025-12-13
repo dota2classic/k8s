@@ -33,14 +33,14 @@ spec:
               value: "production"
           livenessProbe:
             httpGet:
-              path: /healthz
+              path: /trade/tiers
               port: 6100
             initialDelaySeconds: 5
             periodSeconds: 10
 
           readinessProbe:
             httpGet:
-              path: /readyz
+              path: /trade/tiers
               port: 6100
             initialDelaySeconds: 5
             periodSeconds: 10
