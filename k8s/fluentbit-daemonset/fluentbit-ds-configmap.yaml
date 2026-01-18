@@ -38,12 +38,6 @@ data:
         Name    grep
         Match   kube.*
         Exclude kubernetes['namespace_name'] fluent-bit
-    
-    # Exclude the gameserver container logs
-    [FILTER]
-        Name    grep
-        Match   kube.*
-        Exclude kubernetes['container_name'] gameserver
 
     [OUTPUT]
         Name              loki
