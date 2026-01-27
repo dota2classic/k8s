@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tournament
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: tournament
+  template:
+    metadata:
+      labels:
+        app: tournament
+        prometheus-scrape: "true"
+    spec:
+      nodeSelector:
+        ru.dotaclassic/nodeType: "infra"
+      containers:
+        - name: tournament
+          image: dota2classic/tournament:k8s-latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 5003
+              name: http-public
+
+          resources:
+            requests:
+              cpu: 250m       # Pod asks for 0.25 CPU
+              memory: 256Mi
+            limits:
+              cpu: 500m       # Pod can use up to 0.5 CPU
+              memory: 512Mi
+
+          envFrom:
+            - secretRef:
+                name: shared-secrets
+          env:
+            - name: APP_NAME
+              value: "tournament"
+            - name: NODE_ENV
+              value: "production"
