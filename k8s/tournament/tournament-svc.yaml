@@ -7,6 +7,6 @@ spec:
   selector:
     app: tournament
   ports:
-    - port: 6666
-      targetPort: 6100
+    - port: 6600
+      targetPort: 6600
       nodePort: 31011
