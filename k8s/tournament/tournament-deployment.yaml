@@ -20,7 +20,7 @@ spec:
           image: dota2classic/tournament:k8s-latest
           imagePullPolicy: Always
           ports:
-            - containerPort: 5003
+            - containerPort: 6100
               name: http-public
 
           resources:
