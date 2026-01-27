@@ -9,3 +9,4 @@ spec:
   ports:
     - port: 6666
       targetPort: 6100
+      nodePort: 31011
