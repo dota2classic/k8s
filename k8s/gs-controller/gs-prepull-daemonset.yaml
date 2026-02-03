@@ -40,7 +40,7 @@ spec:
                   fi
                 done
                 echo "[$(date '+%Y-%m-%d %H:%M:%S')] Sleeping 300s before next pull round..."
-                sleep 300
+                sleep 60
               done
           volumeMounts:
             - name: containerd-sock
