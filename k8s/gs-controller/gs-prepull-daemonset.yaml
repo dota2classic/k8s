@@ -22,26 +22,27 @@ spec:
         - name: prepull
           securityContext:
             privileged: true
-          image: rancher/k3s:v1.33.5-k3s1  # includes ctr
+          image: rancher/k3s:v1.33.5-k3s1
           command:
             - /bin/sh
             - -c
             - |
               while true; do
-                  for img in \
-                  docker.io/dota2classic/srcds-sidecar:k8s-latest \
-                  docker.io/dota2classic/srcds:d684-latest \
-                  docker.io/dota2classic/srcds:d684-turbo-latest; do
-                  echo "Pulling $img on host..."
-                  if ! ctr --address /run/k3s/containerd/containerd.sock -n k8s.io images pull "$img" >/dev/null 2>&1; then
-                  echo "Failed to pull $img"
+                for img in \
+                docker.io/dota2classic/srcds-sidecar:k8s-latest \
+                docker.io/dota2classic/srcds:d684-latest \
+                docker.io/dota2classic/srcds:d684-turbo-latest; do
+                  echo "[$(date '+%Y-%m-%d %H:%M:%S')] Pulling $img on host $(hostname)..."
+                  if ctr --address /run/k3s/containerd/containerd.sock -n k8s.io images pull "$img"; then
+                    echo "[$(date '+%Y-%m-%d %H:%M:%S')] Successfully pulled $img"
+                  else
+                    echo "[$(date '+%Y-%m-%d %H:%M:%S')] ERROR: Failed to pull $img" >&2
                   fi
-                  done
-                  sleep 300
+                done
+                echo "[$(date '+%Y-%m-%d %H:%M:%S')] Sleeping 300s before next pull round..."
+                sleep 300
               done
-          volumeMounts:
-            - name: containerd-sock
-              mountPath: /run/k3s/containerd/containerd.sock
+
       volumes:
         - name: containerd-sock
           hostPath:
