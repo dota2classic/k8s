@@ -43,15 +43,36 @@ data:
     auto_partial_merge = true
 
 
-    [transforms.add_labels]
-    type = "remap" # adds labels like Promtail
+    [transforms.parse_json]
+    type = "remap"
     inputs = ["kubernetes_logs"]
+    source = '''
+    # Try to parse message as JSON for structured logs
+    if is_string(.message) {
+      parsed, err = parse_json(.message)
+      if err == null {
+        . = merge(., parsed)
+      }
+    }
+    '''
+
+    [transforms.add_labels]
+    type = "remap"
+    inputs = ["parse_json"]
     source = '''
     .namespace = if exists(.kubernetes.pod_namespace) { .kubernetes.pod_namespace } else { "unknown" }
     .pod = if exists(.kubernetes.pod_name) { .kubernetes.pod_name } else { "unknown" }
     .container = if exists(.kubernetes.container_name) { .kubernetes.container_name } else { "unknown" }
     .app = if exists(.kubernetes.pod_labels.app) { .kubernetes.pod_labels.app } else { "unknown" }
     .node = if exists(.kubernetes.pod_node_name) { .kubernetes.pod_node_name } else { "unknown" }
+
+    # Extract match_id from pod name pattern: gameserver-*-job-{match_id}-{hash}
+    pod_name = string!(.pod)
+    match_result = parse_regex(pod_name, r'gameserver-(?:cpu-affinity|regular)-job-(?P<match_id>\d+)-\w+')
+    if match_result != null {
+      .match_id = match_result.match_id
+    }
+
     del(.kubernetes)
     del(.file)
     del(.source_type)
@@ -77,6 +98,7 @@ data:
     labels.container = "{{ container }}"
     labels.app = "{{ app }}"
     labels.node = "{{ node }}"
+    labels.match_id = "{{ match_id }}"
     labels.job = "vector"
 ---
 apiVersion: apps/v1
