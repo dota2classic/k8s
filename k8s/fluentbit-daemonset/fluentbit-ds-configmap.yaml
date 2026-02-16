@@ -1,57 +1,42 @@
-# fluent-bit-config.yaml
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: fluent-bit-config
+  name: promtail-config
   namespace: fluent-bit
 data:
-  fluent-bit.conf: |
-    [SERVICE]
-        Flush        1
-        Daemon       Off
-        Log_Level    info
-        Parsers_File parsers.conf
+  promtail.yaml: |
+    server:
+      http_listen_port: 3101
+      grpc_listen_port: 0
 
-    [INPUT]
-        Name              tail
-        Path              /var/log/containers/*.log
-        Exclude_Path      /var/log/containers/*fluent-bit*.log
-        Parser            cri
-        Tag               kube.*
-        Refresh_Interval  5
-        Mem_Buf_Limit     10MB
-        Skip_Long_Lines   On
-        DB                /tail-db/tail-containers-state.db
+    positions:
+      filename: /run/promtail/positions.yaml
 
+    clients:
+      - url: http://141.105.71.200:3100/loki/api/v1/push
 
-    [FILTER]
-        Name                kubernetes
-        Match               kube.*
-        Merge_Log           On
-        Keep_Log            Off
-        K8S-Logging.Parser  On
-        K8S-Logging.Exclude Off
+    scrape_configs:
+      - job_name: kubernetes-pods
+        kubernetes_sd_configs:
+          - role: pod
 
-    
-    # Exclude Fluent Bit pod logs
-    [FILTER]
-        Name    grep
-        Match   kube.*
-        Exclude kubernetes['namespace_name'] fluent-bit
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_pod_node_name]
+            target_label: node
 
-    [OUTPUT]
-        Name              loki
-        Match             *
-        Host              141.105.71.200
-        Port              3100
-        Labels            node=${HOSTNAME}, job=daemonset
+          - source_labels: [__meta_kubernetes_namespace]
+            target_label: namespace
 
+          - source_labels: [__meta_kubernetes_pod_name]
+            target_label: pod
 
-  parsers.conf: |
-    [PARSER]
-        Name        cri
-        Format      regex
-        Regex       ^(?<time>[^ ]+) (?<stream>stdout|stderr) (?<logtag>[FP]) (?<log>.*)$
-        Time_Key    time
-        Time_Format %Y-%m-%dT%H:%M:%S.%L%z
+          - source_labels: [__meta_kubernetes_pod_container_name]
+            target_label: container
 
+          - action: replace
+            source_labels:
+              - __meta_kubernetes_pod_uid
+              - __meta_kubernetes_pod_container_name
+            separator: /
+            target_label: __path__
+            replacement: /var/log/pods/*$1/*.log
