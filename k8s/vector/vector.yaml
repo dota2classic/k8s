@@ -78,6 +78,11 @@ spec:
         - name: vector
           image: timberio/vector:latest-alpine
           args: ["--config", "/etc/vector/vector.toml"]
+          env:
+            - name: VECTOR_SELF_NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
           volumeMounts:
             - name: varlog
               mountPath: /var/log
