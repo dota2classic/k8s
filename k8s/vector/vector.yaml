@@ -1,19 +1,19 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: logging
+  name: kube-system
 ---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: vector
-  namespace: logging
+  namespace: kube-system
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: vector-config
-  namespace: logging
+  namespace: kube-system
 data:
   vector.toml: |
     [sources.kubernetes_logs]
@@ -42,7 +42,7 @@ apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   name: vector-agent
-  namespace: logging
+  namespace: kube-system
 spec:
   selector:
     matchLabels:
