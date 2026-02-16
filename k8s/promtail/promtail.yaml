@@ -17,12 +17,33 @@ data:
 
     scrape_configs:
       - job_name: kubernetes-pods
-        static_configs:
-          - targets:
-              - localhost
-            labels:
-              job: kubernetes
-              __path__: /var/log/containers/*.log
+        kubernetes_sd_configs:
+          - role: pod
+        relabel_configs:
+          # Only scrape pods in the 'gameservers' namespace
+          - source_labels: [__meta_kubernetes_namespace]
+            regex: gameservers
+            action: keep
+
+          # Path to the container log file
+          - source_labels: [__meta_kubernetes_pod_name, __meta_kubernetes_pod_container_name]
+            separator: "_"
+            target_label: __path__
+            replacement: /var/log/containers/$1_$2.log
+
+          # Standard labels
+          - source_labels: [__meta_kubernetes_namespace]
+            target_label: namespace
+          - source_labels: [__meta_kubernetes_pod_name]
+            target_label: pod
+          - source_labels: [__meta_kubernetes_pod_container_name]
+            target_label: container
+          - source_labels: [__meta_kubernetes_node_name]
+            target_label: node
+
+          # Optional: app label from pod metadata
+          - source_labels: [__meta_kubernetes_pod_label_app]
+            target_label: app
 ---
 apiVersion: apps/v1
 kind: DaemonSet
