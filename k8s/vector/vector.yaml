@@ -36,7 +36,7 @@ data:
   vector.toml: |
     [sources.kubernetes_logs]
     type = "kubernetes_logs"
-    read_from = "start_of_file"          # equivalent to tailing all logs
+    read_from = "beginning"       # <-- was start_of_file
     auto_partial_merge = true            # merge multi-line logs
 
 
