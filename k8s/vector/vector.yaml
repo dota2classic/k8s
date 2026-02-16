@@ -60,6 +60,7 @@ data:
     labels.namespace = "{{ namespace }}"
     labels.pod = "{{ pod }}"
     labels.container = "{{ container }}"
+    labels.job = "vector"
 ---
 apiVersion: apps/v1
 kind: DaemonSet
