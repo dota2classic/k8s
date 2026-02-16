@@ -59,9 +59,15 @@ data:
     inputs = ["add_labels"]
     endpoint = "http://141.105.71.200:3100"
     encoding.codec = "json"
-    batch.max_events = 500
-    batch.timeout_secs = 2
-    batch.max_bytes = 1000000
+    batch.max_events = 1000
+    batch.timeout_secs = 5
+    batch.max_bytes = 5000000
+
+    [sinks.loki.request]
+    rate_limit_num = 10
+    rate_limit_duration_secs = 1
+    retry_initial_backoff_secs = 2
+    retry_max_duration_secs = 30
     
     labels.namespace = "{{ namespace }}"
     labels.pod = "{{ pod }}"
