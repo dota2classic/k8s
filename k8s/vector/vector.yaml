@@ -119,7 +119,7 @@ spec:
       hostNetwork: false
       containers:
         - name: vector
-          image: timberio/vector:latest-alpine
+          image: timberio/vector:0.53.0-alpine
           args: ["--config", "/etc/vector/vector.toml"]
           env:
             - name: VECTOR_SELF_NODE_NAME
