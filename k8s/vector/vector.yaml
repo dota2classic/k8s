@@ -52,6 +52,9 @@ data:
     .container = if exists(.kubernetes.container_name) { .kubernetes.container_name } else { "unknown" }
     .app = if exists(.kubernetes.pod_labels.app) { .kubernetes.pod_labels.app } else { "unknown" }
     .node = if exists(.kubernetes.pod_node_name) { .kubernetes.pod_node_name } else { "unknown" }
+    del(.kubernetes)
+    del(.file)
+    del(.source_type)
     '''
 
     [sinks.loki]
