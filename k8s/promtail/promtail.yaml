@@ -23,30 +23,6 @@ data:
             labels:
               job: kubernetes
               __path__: /var/log/containers/*.log
-        relabel_configs:
-        # Extract namespace (middle group)
-          - source_labels: [__path__]
-            regex: '.*/[^_]+_([^_]+)_[^_]+-.*\.log'
-            target_label: namespace
-          
-          # Keep only default and gameservers
-          - source_labels: [namespace]
-            regex: 'default|gameservers'
-            action: keep
-          
-          # Extract pod name (first group)
-          - source_labels: [__path__]
-            regex: '.*/([^_]+)_[^_]+_[^_]+-.*\.log'
-            target_label: pod
-          
-          # Extract container name (third group before dash)
-          - source_labels: [__path__]
-            regex: '.*/[^_]+_[^_]+_([^_]+)-.*\.log'
-            target_label: container
-          
-          # Attach node name
-          - source_labels: [__host__]
-            target_label: node
 ---
 apiVersion: apps/v1
 kind: DaemonSet
