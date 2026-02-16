@@ -55,7 +55,7 @@ data:
     [sinks.loki]
     type = "loki"
     inputs = ["add_labels"]
-    endpoint = "http://141.105.71.200:3100/loki/api/v1/push"
+    endpoint = "http://141.105.71.200:3100"
     encoding.codec = "json"
     labels.namespace = "{{ namespace }}"
     labels.pod = "{{ pod }}"
