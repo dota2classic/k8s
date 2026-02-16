@@ -36,7 +36,9 @@ data:
   vector.toml: |
     [sources.kubernetes_logs]
     type = "kubernetes_logs"
-    include_containers = ["*"]
+    read_from = "start_of_file"          # equivalent to tailing all logs
+    auto_partial_merge = true            # merge multi-line logs
+
 
     [transforms.add_labels]
     type = "remap" # adds labels like Promtail
