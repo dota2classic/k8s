@@ -35,9 +35,3 @@ spec:
           hostPath:
             path: /var/lib/fluent-bit
             type: DirectoryOrCreate
-      tolerations:
-        - key: "gameserver"
-          operator: "Exists"
-          effect: "NoSchedule"
-      nodeSelector:
-        ru.dotaclassic/nodeType: "gameserver"
