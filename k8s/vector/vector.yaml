@@ -27,7 +27,7 @@ roleRef:
   name: vector
 subjects:
   - kind: ServiceAccount
-    name: vector3
+    name: vector
     namespace: kube-system
 ---
 apiVersion: v1
