@@ -20,11 +20,6 @@ data:
         kubernetes_sd_configs:
           - role: pod
         relabel_configs:
-          # Only scrape pods in the 'gameservers' namespace
-          - source_labels: [__meta_kubernetes_namespace]
-            regex: gameservers
-            action: keep
-
           # Path to the container log file
           - source_labels: [__meta_kubernetes_pod_name, __meta_kubernetes_pod_container_name]
             separator: "_"
