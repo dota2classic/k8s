@@ -47,9 +47,9 @@ data:
     type = "remap" # adds labels like Promtail
     inputs = ["kubernetes_logs"]
     source = '''
-    .namespace = .kubernetes.namespace_name
-    .pod = .kubernetes.pod_name
-    .container = .kubernetes.container_name
+    .namespace = if exists(.kubernetes.namespace_name) { .kubernetes.namespace_name } else { "unknown" }
+    .pod = if exists(.kubernetes.pod_name) { .kubernetes.pod_name } else { "unknown" }
+    .container = if exists(.kubernetes.container_name) { .kubernetes.container_name } else { "unknown" }
     '''
 
     [sinks.loki]
@@ -60,9 +60,6 @@ data:
     labels.namespace = "{{ namespace }}"
     labels.pod = "{{ pod }}"
     labels.container = "{{ container }}"
-    
-    [sinks.loki.healthcheck]
-    enabled = false
 ---
 apiVersion: apps/v1
 kind: DaemonSet
