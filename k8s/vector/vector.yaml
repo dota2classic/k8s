@@ -93,13 +93,15 @@ data:
     retry_initial_backoff_secs = 2
     retry_max_duration_secs = 30
     
-    labels.namespace = "{{ namespace }}"
-    labels.pod = "{{ pod }}"
-    labels.container = "{{ container }}"
-    labels.app = "{{ app }}"
-    labels.node = "{{ node }}"
-    labels.match_id = "{{ match_id }}"
-    labels.job = "vector"
+    [sinks.loki.labels]
+    namespace = "{{ namespace }}"
+    pod = "{{ pod }}"
+    container = "{{ container }}"
+    app = "{{ app }}"
+    node = "{{ node }}"
+    match_id = "{{ match_id }}"
+    job = "vector"
+
 ---
 apiVersion: apps/v1
 kind: DaemonSet
