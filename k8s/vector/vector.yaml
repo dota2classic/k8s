@@ -52,14 +52,14 @@ data:
     .app = if exists(.kubernetes.pod_labels.app) { .kubernetes.pod_labels.app } else { "unknown" }
     .node = if exists(.kubernetes.pod_node_name) { .kubernetes.pod_node_name } else { "unknown" }
     
-    .node_type = if exists(get(.kubernetes.node_labels, "ru.dotaclassic/nodeType")) {
-      get(.kubernetes.node_labels, "ru.dotaclassic/nodeType")
+    .node_type = if exists(get(.kubernetes.node_labels, ["ru.dotaclassic/nodeType"])) {
+      get(.kubernetes.node_labels, ["ru.dotaclassic/nodeType"])
     } else {
       "unknown"
     }
   
-    .match_id = if exists(get(.kubernetes.pod_labels, "ru.dotaclassic/matchId")) {
-      get(.kubernetes.pod_labels, "ru.dotaclassic/matchId")
+    .match_id = if exists(get(.kubernetes.pod_labels, ["ru.dotaclassic/matchId"])) {
+      get(.kubernetes.pod_labels, ["ru.dotaclassic/matchId"])
     } else {
       "unknown"
     }
