@@ -42,23 +42,9 @@ data:
     read_from = "beginning"
     auto_partial_merge = true
 
-
-    [transforms.parse_json]
-    type = "remap"
-    inputs = ["kubernetes_logs"]
-    source = '''
-    if is_string(.message) {
-      parsed, err = parse_json(.message)
-      if err == null && is_object(parsed) && is_object(.) {
-        . = merge!(., parsed)
-      }
-    }
-      '''
-
-
     [transforms.add_labels]
     type = "remap"
-    inputs = ["parse_json"]
+    inputs = ["kubernetes_logs"]
     source = '''
     .namespace = if exists(.kubernetes.pod_namespace) { .kubernetes.pod_namespace } else { "unknown" }
     .pod = if exists(.kubernetes.pod_name) { .kubernetes.pod_name } else { "unknown" }
