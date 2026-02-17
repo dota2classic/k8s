@@ -47,14 +47,14 @@ data:
     type = "remap"
     inputs = ["kubernetes_logs"]
     source = '''
-    # Try to parse message as JSON for structured logs
     if is_string(.message) {
       parsed, err = parse_json(.message)
-      if err == null {
-        . = merge(., parsed)
+      if err == null && is_object(parsed) && is_object(.) {
+        . = merge!(., parsed)
       }
     }
-    '''
+      '''
+
 
     [transforms.add_labels]
     type = "remap"
