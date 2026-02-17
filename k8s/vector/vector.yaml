@@ -54,13 +54,14 @@ data:
     
     .node_type = get(.kubernetes.node_labels, ["ru.dotaclassic/nodeType"]) ?? "unknown"
     .match_id  = get(.kubernetes.pod_labels, ["ru.dotaclassic/matchId"]) ?? "unknown"
+    .region  = get(.kubernetes.pod_labels, ["ru.dotaclassic/region"]) ?? "unknown"
 
 
     # Extract match_id from pod name pattern (optional, can remove if using label)
     pod_name = string!(.pod)
 
-    # del(.kubernetes)
-    # del(.file)
+    del(.kubernetes)
+    del(.file)
     # del(.source_type)
     '''
 
@@ -87,6 +88,7 @@ data:
     app = "{{ app }}"
     node = "{{ node }}"
     match_id = "{{ match_id }}"
+    region = "{{ region }}"
     job = "vector"
 
 ---
