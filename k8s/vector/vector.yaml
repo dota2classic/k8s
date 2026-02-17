@@ -54,10 +54,6 @@ data:
 
     # Extract match_id from pod name pattern: gameserver-*-job-{match_id}-{hash}
     pod_name = string!(.pod)
-    match_result = parse_regex(pod_name, r'gameserver-(?:cpu-affinity|regular)-job-(?P<match_id>\d+)-\w+')
-    if match_result != null {
-      .match_id = match_result.match_id
-    }
 
     del(.kubernetes)
     del(.file)
