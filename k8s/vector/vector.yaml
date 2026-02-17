@@ -56,9 +56,9 @@ data:
         # Extract match_id from pod name pattern (optional, can remove if using label)
         pod_name = string!(.pod)
       
-        del(.kubernetes)
-        del(.file)
-        del(.source_type)
+        # del(.kubernetes)
+        # del(.file)
+        # del(.source_type)
     
 
     [sinks.loki]
