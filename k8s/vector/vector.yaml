@@ -51,8 +51,13 @@ data:
     .container = if exists(.kubernetes.container_name) { .kubernetes.container_name } else { "unknown" }
     .app = if exists(.kubernetes.pod_labels.app) { .kubernetes.pod_labels.app } else { "unknown" }
     .node = if exists(.kubernetes.pod_node_name) { .kubernetes.pod_node_name } else { "unknown" }
+    if exists(.kubernetes.pod_labels["ru.dotaclassic/matchId"]) {
+        .match_id = .kubernetes.pod_labels["ru.dotaclassic/matchId"]
+    }
+  
+  
 
-    # Extract match_id from pod name pattern: gameserver-*-job-{match_id}-{hash}
+  # Extract match_id from pod name pattern: gameserver-*-job-{match_id}-{hash}
     pod_name = string!(.pod)
 
     del(.kubernetes)
