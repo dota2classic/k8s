@@ -45,20 +45,21 @@ data:
     [transforms.add_labels]
     type = "remap"
     inputs = ["kubernetes_logs"]
-    source = |
-        .namespace = if exists(.kubernetes.pod_namespace) { .kubernetes.pod_namespace } else { "unknown" }
-        .pod = if exists(.kubernetes.pod_name) { .kubernetes.pod_name } else { "unknown" }
-        .container = if exists(.kubernetes.container_name) { .kubernetes.container_name } else { "unknown" }
-        .app = if exists(.kubernetes.pod_labels.app) { .kubernetes.pod_labels.app } else { "unknown" }
-        .node = if exists(.kubernetes.pod_node_name) { .kubernetes.pod_node_name } else { "unknown" }
-    
-    
-        # Extract match_id from pod name pattern (optional, can remove if using label)
-        pod_name = string!(.pod)
-    
-        # del(.kubernetes)
-        # del(.file)
-        # del(.source_type)
+    source = '''
+    .namespace = if exists(.kubernetes.pod_namespace) { .kubernetes.pod_namespace } else { "unknown" }
+    .pod = if exists(.kubernetes.pod_name) { .kubernetes.pod_name } else { "unknown" }
+    .container = if exists(.kubernetes.container_name) { .kubernetes.container_name } else { "unknown" }
+    .app = if exists(.kubernetes.pod_labels.app) { .kubernetes.pod_labels.app } else { "unknown" }
+    .node = if exists(.kubernetes.pod_node_name) { .kubernetes.pod_node_name } else { "unknown" }
+
+
+    # Extract match_id from pod name pattern (optional, can remove if using label)
+    pod_name = string!(.pod)
+
+    # del(.kubernetes)
+    # del(.file)
+    # del(.source_type)
+    '''
 
 
     [sinks.loki]
