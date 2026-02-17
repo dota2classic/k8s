@@ -86,7 +86,7 @@ data:
     container = "{{ container }}"
     app = "{{ app }}"
     node = "{{ node }}"
-    # match_id = "{{ match_id }}"
+    match_id = "{{ match_id }}"
     job = "vector"
 
 ---
