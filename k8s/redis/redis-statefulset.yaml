@@ -24,6 +24,10 @@ spec:
             - "$(REDIS_PASSWORD)"
             - "--dir"
             - "/data"
+            - "--save"
+            - "60 1"
+            - "--save"
+            - "300 10"
           env:
             - name: REDIS_PASSWORD
               valueFrom:
