@@ -8,6 +8,9 @@ spec:
     matchLabels:
       app: tg-announcer-bot
   template:
+    metadata:
+      labels:
+        app: tg-announcer-bot
     spec:
       nodeSelector:
         ru.dotaclassic/nodeType: "infra"
