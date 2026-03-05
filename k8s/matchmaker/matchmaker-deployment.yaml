@@ -11,6 +11,7 @@ spec:
     metadata:
       labels:
         app: matchmaker
+        prometheus-scrape: "true"
     spec:
       nodeSelector:
         ru.dotaclassic/nodeType: "infra"
