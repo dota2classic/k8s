@@ -18,7 +18,13 @@ spec:
         - name: paymentbot
           image: dota2classic/payment:k8s-latest
           imagePullPolicy: Always
-
+          resources:
+            requests:
+              cpu: 10m
+              memory: 100Mi
+            limits:
+              cpu: 25m
+              memory: 128Mi
           envFrom:
             - secretRef:
                 name: shared-secrets

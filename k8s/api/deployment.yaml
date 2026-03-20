@@ -19,6 +19,13 @@ spec:
         - name: api
           image: dota2classic/gateway:k8s-latest
           imagePullPolicy: Always
+          resources:
+            requests:
+              cpu: 150m
+              memory: 300Mi
+            limits:
+              cpu: 500m
+              memory: 500Mi
           ports:
             - containerPort: 6001
               name: http-public-api

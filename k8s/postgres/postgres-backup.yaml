@@ -17,7 +17,13 @@ spec:
       containers:
         - name: postgres-backup
           image: eeshugerman/postgres-backup-s3:16
-
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              cpu: 100m
+              memory: 150Mi
           envFrom:
             - secretRef:
                 name: shared-secrets

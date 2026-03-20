@@ -18,6 +18,13 @@ spec:
         - name: frontend
           image: dota2classic/frontend:k8s-latest
           imagePullPolicy: Always
+          resources:
+            requests:
+              cpu: 60m
+              memory: 180Mi
+            limits:
+              cpu: 160m
+              memory: 280Mi
           ports:
             - containerPort: 3000
           env:

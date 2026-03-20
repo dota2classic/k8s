@@ -25,11 +25,11 @@ spec:
 
           resources:
             requests:
-              cpu: 250m       # Pod asks for 0.25 CPU
-              memory: 256Mi
+              cpu: 25m
+              memory: 96Mi
             limits:
-              cpu: 500m       # Pod can use up to 0.5 CPU
-              memory: 512Mi
+              cpu: 300m
+              memory: 128Mi
 
           envFrom:
             - secretRef:

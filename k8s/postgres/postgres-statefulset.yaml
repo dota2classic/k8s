@@ -21,7 +21,10 @@ spec:
           image: postgres:16.4-bookworm
           resources:
             requests:
-              cpu: 1000m
+              cpu: 300m
+              memory: 1Gi
+            limits:
+              cpu: 1500m
               memory: 2Gi
           ports:
             - containerPort: 5432

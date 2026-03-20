@@ -18,6 +18,13 @@ spec:
         - name: tradebot
           image: dota2classic/tradebot:k8s-latest
           imagePullPolicy: Always
+          resources:
+            requests:
+              cpu: 25m
+              memory: 256Mi
+            limits:
+              cpu: 80m
+              memory: 320Mi
           ports:
             - containerPort: 6100
 

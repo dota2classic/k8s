@@ -21,11 +21,11 @@ spec:
 
           resources:
             requests:
-              cpu: 100m       # Pod asks for 0.25 CPU
-              memory: 64Mi
+              cpu: 10m
+              memory: 110Mi
             limits:
-              cpu: 250m       # Pod can use up to 0.5 CPU
-              memory: 128Mi
+              cpu: 120m
+              memory: 160Mi
           ports:
             - containerPort: 3000
           env:

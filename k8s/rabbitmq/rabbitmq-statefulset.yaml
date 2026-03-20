@@ -18,6 +18,13 @@ spec:
       containers:
         - name: rabbitmq
           image: rabbitmq:3.13-management
+          resources:
+            requests:
+              cpu: 25m
+              memory: 180Mi
+            limits:
+              cpu: 400m
+              memory: 300Mi
           ports:
             - containerPort: 5672
             - containerPort: 15672
