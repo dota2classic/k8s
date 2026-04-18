@@ -31,6 +31,7 @@ spec:
                 for img in \
                 docker.io/dota2classic/srcds-sidecar:k8s-latest \
                 docker.io/dota2classic/srcds:d684-latest \
+                docker.io/dota2classic/srcds:d684-crash-fix-latest \
                 docker.io/dota2classic/srcds:d684-turbo-latest; do
                   echo "[$(date '+%Y-%m-%d %H:%M:%S')] Pulling $img on host $(hostname)..."
                   if ctr --address /run/k3s/containerd/containerd.sock -n k8s.io images pull "$img"; then
