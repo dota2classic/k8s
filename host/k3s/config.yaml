@@ -12,7 +12,6 @@ kube-apiserver-arg:
 kube-proxy-arg:
   - nodeport-addresses=127.0.0.0/8
 kubelet-arg:
-  - cpu-manager-policy=static
   - system-reserved=cpu=200m,memory=384Mi
   - kube-reserved=cpu=200m,memory=384Mi
 node-label:
