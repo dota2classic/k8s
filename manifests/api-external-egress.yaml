@@ -1,0 +1,30 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: api-external-integrations
+spec:
+  podSelector:
+    matchLabels:
+      app: api
+  policyTypes: [Egress]
+  egress:
+  # DNS snapshot on 2026-11-19; refresh and reverify if Steam changes addresses.
+  # Internal services and cluster DNS remain covered by backend-stage-egress.
+  - to:
+    - ipBlock:
+        cidr: 23.50.131.157/32
+    - ipBlock:
+        cidr: 23.50.131.135/32
+    - ipBlock:
+        cidr: 72.246.28.192/32
+    - ipBlock:
+        cidr: 141.105.71.200/32
+    ports:
+    - protocol: TCP
+      port: 443
+  - to:
+    - ipBlock:
+        cidr: 141.105.71.200/32
+    ports:
+    - protocol: TCP
+      port: 9090

@@ -1,0 +1,107 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: s3-tls-bridge
+data:
+  proxy.js: "const http=require('node:http'),https=require('node:https');\nhttp.createServer((request,response)=>{\n\
+    \  if(!['GET','HEAD','PUT','POST','DELETE'].includes(request.method)||!/^\\/(public|logs|replays|dumps)(\\\
+    /|\\?|$)/.test(request.url)||request.headers.host!=='s3-tls-bridge.default.svc.cluster.local:9000'||!request.headers.authorization?.startsWith('AWS4-HMAC-SHA256\
+    \ Credential='+process.env.S3_ACCESS_KEY_ID+'/')){\n    response.writeHead(403);response.end();return;\n\
+    \  }\n  const upstream=https.request({hostname:'141.105.71.200',port:443,servername:'cdn.dotaclassic.ru',method:request.method,path:request.url,headers:{...request.headers,connection:'close'},timeout:120000},result=>{\n\
+    \    response.writeHead(result.statusCode,result.headers);result.pipe(response);\n\
+    \  });\n  upstream.on('timeout',()=>upstream.destroy());\n  upstream.on('error',error=>{console.error('S3\
+    \ upstream error:',error.code||'network');if(!response.headersSent)response.writeHead(502);response.end()});\n\
+    \  request.on('aborted',()=>upstream.destroy());request.pipe(upstream);\n}).listen(9000,'0.0.0.0');\n"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: s3-tls-bridge
+spec:
+  selector:
+    app: s3-tls-bridge
+  ports:
+  - port: 9000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: s3-tls-bridge
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: s3-tls-bridge
+  template:
+    metadata:
+      labels:
+        app: s3-tls-bridge
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - name: proxy
+        image: node@sha256:12f54cafa58d0e96554ae05871e29663ff7241836377dc9a7916449b8adb062c
+        command:
+        - node
+        - /config/proxy.js
+        env:
+        - name: S3_ACCESS_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              name: shared-secrets
+              key: S3_ACCESS_KEY_ID
+        resources:
+          requests:
+            cpu: 10m
+            memory: 32Mi
+          limits:
+            cpu: 300m
+            memory: 128Mi
+        volumeMounts:
+        - name: config
+          mountPath: /config
+          readOnly: true
+        readinessProbe:
+          tcpSocket:
+            port: 9000
+      volumes:
+      - name: config
+        configMap:
+          name: s3-tls-bridge
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: s3-tls-bridge
+spec:
+  podSelector:
+    matchLabels:
+      app: s3-tls-bridge
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: gameservers
+      podSelector:
+        matchExpressions:
+        - key: ru.dotaclassic/matchId
+          operator: Exists
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: default
+      podSelector:
+        matchLabels:
+          app: api
+    ports:
+    - protocol: TCP
+      port: 9000
+  egress:
+  - to:
+    - ipBlock:
+        cidr: 141.105.71.200/32
+    ports:
+    - protocol: TCP
+      port: 443

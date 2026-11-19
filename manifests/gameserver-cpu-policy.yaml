@@ -1,0 +1,42 @@
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingAdmissionPolicy
+metadata:
+  name: d2c-gameserver-cpu
+spec:
+  failurePolicy: Fail
+  reinvocationPolicy: IfNeeded
+  matchConstraints:
+    resourceRules:
+    - apiGroups: ['']
+      apiVersions: [v1]
+      operations: [CREATE]
+      resources: [pods]
+    namespaceSelector:
+      matchLabels:
+        kubernetes.io/metadata.name: gameservers
+  matchConditions:
+  - name: controller-game-layout
+    expression: >-
+      has(object.metadata.labels) && 'ru.dotaclassic/matchId' in object.metadata.labels &&
+      size(object.spec.containers) == 2 && object.spec.containers[0].name == 'sidecar' &&
+      object.spec.containers[1].name == 'gameserver' &&
+      object.spec.containers[1].image.startsWith('dota2classic/srcds:')
+  mutations:
+  - patchType: JSONPatch
+    jsonPatch:
+      expression: >-
+        [JSONPatch{op: 'add', path: '/spec/containers/0/resources', value:
+          {'requests': {'cpu': '50m', 'memory': '128Mi'}, 'limits': {'memory': '256Mi'}}},
+         JSONPatch{op: 'add', path: '/spec/containers/1/resources', value:
+          {'requests': {'cpu': '400m', 'memory': '512Mi'}, 'limits': {'memory': '1Gi'}}}]
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingAdmissionPolicyBinding
+metadata:
+  name: d2c-gameserver-cpu
+spec:
+  policyName: d2c-gameserver-cpu
+  matchResources:
+    namespaceSelector:
+      matchLabels:
+        kubernetes.io/metadata.name: gameservers

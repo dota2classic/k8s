@@ -1,0 +1,12 @@
+# Apply after authoritative DNS for both names points to Netcup.
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: frontend-tls
+  namespace: default
+spec:
+  secretName: frontend-tls
+  dnsNames: [dotaclassic.ru, www.dotaclassic.ru]
+  issuerRef:
+    kind: ClusterIssuer
+    name: letsencrypt-prod

@@ -1,0 +1,182 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: launcher-proxy
+  namespace: default
+data:
+  nginx.conf: |
+    worker_processes 1;
+    pid /tmp/nginx.pid;
+    error_log /dev/stderr warn;
+    events { worker_connections 1024; }
+    http {
+      log_format download '$time_iso8601 "$request" status=$status bytes=$body_bytes_sent request_seconds=$request_time upstream_seconds=$upstream_response_time cache=$upstream_cache_status';
+      access_log /dev/stdout download;
+      proxy_cache_path /tmp/metadata-cache levels=1:2 keys_zone=metadata:1m max_size=16m inactive=1h use_temp_path=off;
+      client_body_temp_path /tmp/client_temp;
+      proxy_temp_path /tmp/proxy_temp;
+      fastcgi_temp_path /tmp/fastcgi_temp;
+      uwsgi_temp_path /tmp/uwsgi_temp;
+      scgi_temp_path /tmp/scgi_temp;
+      server_tokens off;
+      gzip on;
+      gzip_types application/json;
+      gzip_min_length 1024;
+      gzip_comp_level 5;
+      gzip_vary on;
+      upstream launcher_origin {
+        server 141.105.71.200:443;
+        keepalive 32;
+        keepalive_timeout 60s;
+      }
+      server {
+        listen 8080;
+        server_name _;
+        location = /healthz { access_log off; return 200 'ok'; }
+        location /files/ {
+          limit_except GET HEAD { deny all; }
+          proxy_pass https://launcher_origin;
+          proxy_http_version 1.1;
+          proxy_set_header Host launcher-origin.dotaclassic.ru;
+          proxy_set_header Connection "";
+          proxy_set_header Authorization "";
+          proxy_set_header Cookie "";
+          proxy_ssl_server_name on;
+          proxy_ssl_name launcher-origin.dotaclassic.ru;
+          proxy_ssl_verify on;
+          proxy_ssl_verify_depth 5;
+          proxy_ssl_trusted_certificate /etc/ssl/certs/ca-certificates.crt;
+          proxy_connect_timeout 10s;
+          proxy_read_timeout 120s;
+          proxy_send_timeout 120s;
+          proxy_buffering off;
+          proxy_max_temp_file_size 0;
+          proxy_redirect off;
+          location = /files/core/manifest.json {
+            proxy_pass https://launcher_origin;
+            proxy_cache metadata;
+            proxy_cache_lock on;
+            proxy_cache_revalidate on;
+            proxy_cache_valid 200 5s;
+            proxy_ignore_headers Cache-Control Expires;
+            proxy_hide_header Cache-Control;
+            add_header Cache-Control 'no-cache' always;
+            add_header X-Manifest-Cache $upstream_cache_status always;
+            proxy_buffering on;
+            proxy_buffers 8 32k;
+            proxy_buffer_size 16k;
+          }
+        }
+        location / { return 404; }
+      }
+    }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: launcher-proxy
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {app: launcher-proxy}
+  template:
+    metadata:
+      labels: {app: launcher-proxy}
+      annotations:
+        ru.dotaclassic/config-revision: upstream-keepalive
+        kubernetes.io/egress-bandwidth: 60M
+    spec:
+      automountServiceAccountToken: false
+      nodeSelector:
+        ru.dotaclassic/infra: 'true'
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 101
+        runAsGroup: 101
+        fsGroup: 101
+        seccompProfile: {type: RuntimeDefault}
+        sysctls:
+        - {name: net.ipv4.tcp_wmem, value: "4096 65536 4194304"}
+        - {name: net.ipv4.tcp_rmem, value: "4096 87380 4194304"}
+      containers:
+      - name: nginx
+        image: nginx@sha256:09369da6b10306312cd908661320086bf87fbae1b6b0c49a1f50ba531fef2eab
+        command: [nginx, '-g', 'daemon off;']
+        ports: [{containerPort: 8080}]
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities: {drop: [ALL]}
+        resources:
+          requests: {cpu: 100m, memory: 64Mi}
+          limits: {cpu: 500m, memory: 512Mi}
+        readinessProbe:
+          httpGet: {path: /healthz, port: 8080}
+          timeoutSeconds: 5
+        livenessProbe:
+          httpGet: {path: /healthz, port: 8080}
+          initialDelaySeconds: 10
+          timeoutSeconds: 5
+        volumeMounts:
+        - {name: config, mountPath: /etc/nginx/nginx.conf, subPath: nginx.conf, readOnly: true}
+        - {name: temporary, mountPath: /tmp}
+      volumes:
+      - name: config
+        configMap: {name: launcher-proxy}
+      - name: temporary
+        emptyDir: {sizeLimit: 32Mi}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: launcher-proxy
+  namespace: default
+spec:
+  selector: {app: launcher-proxy}
+  ports: [{port: 8080, targetPort: 8080}]
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: launcher-proxy
+  namespace: default
+spec:
+  podSelector:
+    matchLabels: {app: launcher-proxy}
+  policyTypes: [Ingress, Egress]
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels: {kubernetes.io/metadata.name: kube-system}
+      podSelector:
+        matchLabels: {app.kubernetes.io/name: traefik}
+    ports: [{protocol: TCP, port: 8080}]
+  egress:
+  - to:
+    - ipBlock: {cidr: 141.105.71.200/32}
+    ports: [{protocol: TCP, port: 443}]
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: launcher
+  namespace: default
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+spec:
+  ingressClassName: traefik
+  tls:
+  - hosts: [launcher.dotaclassic.ru]
+    secretName: launcher-tls
+  rules:
+  - host: launcher.dotaclassic.ru
+    http:
+      paths:
+      - path: /files/
+        pathType: Prefix
+        backend:
+          service:
+            name: launcher-proxy
+            port: {number: 8080}

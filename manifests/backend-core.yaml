@@ -1,0 +1,212 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: backend-stage-egress
+  namespace: default
+spec:
+  podSelector:
+    matchLabels:
+      stage: backend
+  policyTypes:
+  - Egress
+  egress:
+  - to:
+    - podSelector: {}
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: kube-system
+    ports:
+    - protocol: UDP
+      port: 53
+    - protocol: TCP
+      port: 53
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gameserver
+  namespace: default
+spec:
+  selector:
+    app: gameserver
+  ports:
+  - port: 5003
+    targetPort: 5003
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gameserver
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gameserver
+  template:
+    metadata:
+      labels:
+        app: gameserver
+        stage: backend
+    spec:
+      enableServiceLinks: false
+      automountServiceAccountToken: false
+      nodeSelector:
+        ru.dotaclassic/infra: 'true'
+      containers:
+      - name: gameserver
+        image: dota2classic/gameserver@sha256:0a58c0fd6f375fa10fe3a9b46de2b80ab20285b30d73f665a10cd29268cb20b8
+        envFrom:
+        - secretRef:
+            name: shared-secrets
+        env:
+        - name: APP_NAME
+          value: gameserver
+        - name: NODE_ENV
+          value: production
+        - name: FLUENTBIT_DISABLED
+          value: 'true'
+        - name: GAMESERVER_API
+          value: http://gameserver:5003
+        - name: FORUM_API
+          value: http://forum:6009
+        - name: SCALET
+          value: 'true'
+        resources:
+          requests:
+            cpu: 150m
+            memory: 128Mi
+          limits:
+            memory: 384Mi
+        ports:
+        - containerPort: 5003
+        readinessProbe:
+          httpGet:
+            path: /info/seasons
+            port: 5003
+          periodSeconds: 10
+          timeoutSeconds: 10
+        startupProbe:
+          tcpSocket:
+            port: 5003
+          periodSeconds: 5
+          failureThreshold: 60
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: user
+  template:
+    metadata:
+      labels:
+        app: user
+        stage: backend
+    spec:
+      enableServiceLinks: false
+      automountServiceAccountToken: false
+      nodeSelector:
+        ru.dotaclassic/infra: 'true'
+      containers:
+      - name: user
+        image: dota2classic/user@sha256:fb892dc5b65097ab7628d845f9283eefa9298cccf2d51222ddb21194b549d6f3
+        envFrom:
+        - secretRef:
+            name: shared-secrets
+        env:
+        - name: APP_NAME
+          value: user
+        - name: NODE_ENV
+          value: production
+        - name: FLUENTBIT_DISABLED
+          value: 'true'
+        - name: GAMESERVER_API
+          value: http://gameserver:5003
+        - name: FORUM_API
+          value: http://forum:6009
+        - name: SCALET
+          value: 'true'
+        resources:
+          requests:
+            cpu: 50m
+            memory: 128Mi
+          limits:
+            cpu: 1000m
+            memory: 384Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: matchmaker
+  namespace: default
+spec:
+  selector:
+    app: matchmaker
+  ports:
+  - port: 7777
+    targetPort: 7777
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: matchmaker
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: matchmaker
+  template:
+    metadata:
+      labels:
+        app: matchmaker
+        stage: backend
+    spec:
+      enableServiceLinks: false
+      automountServiceAccountToken: false
+      nodeSelector:
+        ru.dotaclassic/infra: 'true'
+      containers:
+      - name: matchmaker
+        image: dota2classic/matchmaker@sha256:8b11d342992cb520e8cd5733190d581d9bc3aa387d6d64f06764c17ebb45c25d
+        envFrom:
+        - secretRef:
+            name: shared-secrets
+        env:
+        - name: APP_NAME
+          value: matchmaker
+        - name: NODE_ENV
+          value: production
+        - name: FLUENTBIT_DISABLED
+          value: 'true'
+        - name: GAMESERVER_API
+          value: http://gameserver:5003
+        - name: FORUM_API
+          value: http://forum:6009
+        - name: SCALET
+          value: 'true'
+        resources:
+          requests:
+            cpu: 50m
+            memory: 128Mi
+          limits:
+            memory: 384Mi
+        ports:
+        - containerPort: 7777
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 7777
+          periodSeconds: 10
+          timeoutSeconds: 10
+        startupProbe:
+          tcpSocket:
+            port: 7777
+          periodSeconds: 5
+          failureThreshold: 60

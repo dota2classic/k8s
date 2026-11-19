@@ -1,0 +1,12 @@
+[Unit]
+Description=Restore the DotaLegacy profile cache after Redis cache loss
+After=k3s.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 /root/ensure-user-profiles.py
+TimeoutStartSec=300
+CPUAffinity=0
+CPUQuota=50%
+MemoryMax=384M
+UMask=0077

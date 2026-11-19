@@ -1,0 +1,8 @@
+[Unit]
+Description=Refresh Steam DNS allowlist every minute
+[Timer]
+OnBootSec=1min
+OnUnitActiveSec=1min
+Unit=d2c-steam-egress.service
+[Install]
+WantedBy=timers.target

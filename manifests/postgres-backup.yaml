@@ -1,0 +1,97 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: postgres-backup
+  namespace: default
+spec:
+  schedule: '15 */6 * * *'
+  timeZone: Etc/UTC
+  concurrencyPolicy: Forbid
+  startingDeadlineSeconds: 3600
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      activeDeadlineSeconds: 1200
+      template:
+        metadata:
+          labels: {app: postgres-backup}
+        spec:
+          restartPolicy: Never
+          automountServiceAccountToken: false
+          nodeSelector:
+            ru.dotaclassic/infra: 'true'
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 999
+            runAsGroup: 999
+            fsGroup: 999
+            seccompProfile: {type: RuntimeDefault}
+          initContainers:
+          - name: dump
+            image: postgres@sha256:e62fbf9d3e2b49816a32c400ed2dba83e3b361e6833e624024309c35d334b412
+            command: [sh, '-ec']
+            args:
+            - pg_dump --format=custom --compress=6 --no-owner --no-acl --lock-wait-timeout=10s --file=/backup/postgres.dump; pg_restore --list /backup/postgres.dump > /backup/archive-toc.txt
+            env:
+            - {name: PGHOST, value: postgres.default.svc.cluster.local}
+            - {name: PGPORT, value: '5432'}
+            - {name: PGUSER, value: postgres}
+            - {name: PGDATABASE, value: postgres}
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef: {name: shared-secrets, key: POSTGRES_PASSWORD}
+            resources:
+              requests: {cpu: 50m, memory: 64Mi}
+              limits: {cpu: 500m, memory: 256Mi}
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: {drop: [ALL]}
+            volumeMounts:
+            - {name: backup, mountPath: /backup}
+          containers:
+          - name: upload
+            image: node@sha256:12f54cafa58d0e96554ae05871e29663ff7241836377dc9a7916449b8adb062c
+            command: [node, /scripts/backup-s3.js, upload]
+            envFrom:
+            - secretRef: {name: postgres-backup-secrets}
+            resources:
+              requests: {cpu: 25m, memory: 64Mi}
+              limits: {cpu: 500m, memory: 192Mi}
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: {drop: [ALL]}
+            volumeMounts:
+            - {name: backup, mountPath: /backup}
+            - {name: scripts, mountPath: /scripts, readOnly: true}
+          volumes:
+          - name: backup
+            emptyDir: {sizeLimit: 2Gi}
+          - name: scripts
+            configMap: {name: postgres-backup-scripts}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: postgres-backup
+  namespace: default
+spec:
+  podSelector:
+    matchLabels: {app: postgres-backup}
+  policyTypes: [Ingress, Egress]
+  ingress: []
+  egress:
+  - to:
+    - podSelector:
+        matchLabels: {app: postgres}
+    ports: [{protocol: TCP, port: 5432}]
+  - to:
+    - namespaceSelector:
+        matchLabels: {kubernetes.io/metadata.name: kube-system}
+    ports: [{protocol: UDP, port: 53}, {protocol: TCP, port: 53}]
+  - to:
+    - ipBlock: {cidr: 141.105.71.200/32}
+    ports: [{protocol: TCP, port: 443}]

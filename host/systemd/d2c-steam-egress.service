@@ -1,0 +1,6 @@
+[Unit]
+Description=Refresh exact Steam destination addresses for API NetworkPolicy
+After=k3s.service network-online.target
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 /root/refresh-steam-egress.py
