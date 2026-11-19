@@ -67,7 +67,7 @@ spec:
       serviceAccountName: gs-controller-sa
       containers:
       - name: gs-controller
-        image: dota2classic/gs-controller@sha256:e6d43ae91ee714cb6be8b8b2a4dda7e24941dd9ddbcf178dd018e48dac1a516a
+        image: dota2classic/gs-controller@sha256:4391f470650bf31332d15d00a3b96f001d929811e0d28eba33747fc954233a16
         imagePullPolicy: IfNotPresent
         resources:
           requests:
