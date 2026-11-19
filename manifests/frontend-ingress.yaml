@@ -8,7 +8,7 @@ metadata:
 spec:
   ingressClassName: traefik
   tls:
-  - hosts: [dotaclassic.ru, www.dotaclassic.ru]
+  - hosts: [dotaclassic.ru, www.dotaclassic.ru, en.dotaclassic.ru]
     secretName: frontend-tls
   rules:
   - host: dotaclassic.ru
@@ -21,6 +21,15 @@ spec:
             name: frontend
             port: {number: 3000}
   - host: www.dotaclassic.ru
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: frontend
+            port: {number: 3000}
+  - host: en.dotaclassic.ru
     http:
       paths:
       - path: /
@@ -61,6 +70,15 @@ spec:
             name: frontend
             port: {number: 3000}
   - host: www.dotaclassic.ru
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: frontend
+            port: {number: 3000}
+  - host: en.dotaclassic.ru
     http:
       paths:
       - path: /
