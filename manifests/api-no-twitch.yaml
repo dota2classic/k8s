@@ -63,10 +63,9 @@ spec:
           value: 'false'
         resources:
           requests:
-            cpu: 50m
+            cpu: 550m
             memory: 256Mi
           limits:
-            cpu: 1000m
             memory: 512Mi
         ports:
         - containerPort: 6001
