@@ -6,7 +6,7 @@ metadata:
   namespace: default
 spec:
   secretName: frontend-tls
-  dnsNames: [dotaclassic.ru, www.dotaclassic.ru]
+  dnsNames: [dotaclassic.ru, www.dotaclassic.ru, en.dotaclassic.ru]
   issuerRef:
     kind: ClusterIssuer
     name: letsencrypt-prod
