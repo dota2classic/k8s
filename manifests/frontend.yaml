@@ -30,7 +30,7 @@ spec:
         ru.dotaclassic/infra: 'true'
       containers:
       - name: frontend
-        image: dota2classic/frontend@sha256:a23df027c01feb0ca53b2d79ea0da33a11dd4a96cd7625abaf3dd210a6ccb801
+        image: dota2classic/frontend@sha256:0e7297e215b4529b8ef101f47f35797b3e83d0bbcc0eebbf23e156ef751b7125
         env:
         - name: NODE_ENV
           value: production
@@ -53,7 +53,7 @@ spec:
               key: WEBPUSH_PUBLIC_KEY
         resources:
           requests:
-            cpu: 350m
+            cpu: 300m
             memory: 180Mi
           limits:
             memory: 512Mi

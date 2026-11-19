@@ -1,0 +1,8 @@
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: game-server
+value: 1000000
+preemptionPolicy: Never
+globalDefault: false
+description: Match pods are scheduled first and evicted last; they never preempt running pods.
