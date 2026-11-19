@@ -1,0 +1,10 @@
+[Unit]
+Description=Ensure restored user profiles are present in Redis
+
+[Timer]
+OnBootSec=2min
+OnUnitInactiveSec=5min
+Unit=d2c-profile-cache.service
+
+[Install]
+WantedBy=timers.target

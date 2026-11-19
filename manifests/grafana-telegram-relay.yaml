@@ -1,0 +1,97 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grafana-telegram-relay
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {app: grafana-telegram-relay}
+  template:
+    metadata:
+      labels: {app: grafana-telegram-relay}
+    spec:
+      automountServiceAccountToken: false
+      nodeSelector:
+        ru.dotaclassic/infra: 'true'
+      containers:
+      - name: relay
+        image: node@sha256:12f54cafa58d0e96554ae05871e29663ff7241836377dc9a7916449b8adb062c
+        command: [node, /config/relay.js]
+        envFrom:
+        - secretRef: {name: grafana-telegram-relay}
+        env:
+        - name: TELEGRAM_TOKEN
+          valueFrom:
+            secretKeyRef: {name: shared-secrets, key: TELEGRAM_TOKEN}
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 999
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities: {drop: [ALL]}
+          seccompProfile: {type: RuntimeDefault}
+        resources:
+          requests: {cpu: 10m, memory: 32Mi}
+          limits: {cpu: 250m, memory: 128Mi}
+        readinessProbe:
+          httpGet: {path: /healthz, port: 9103}
+        volumeMounts:
+        - {name: config, mountPath: /config, readOnly: true}
+      volumes:
+      - name: config
+        configMap: {name: grafana-telegram-relay}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: grafana-telegram-relay
+  namespace: default
+spec:
+  selector: {app: grafana-telegram-relay}
+  ports: [{port: 9103, targetPort: 9103}]
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: grafana-telegram-relay
+  namespace: default
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+spec:
+  ingressClassName: traefik
+  tls:
+  - hosts: [api.dotaclassic.ru]
+    secretName: api-tls
+  rules:
+  - host: api.dotaclassic.ru
+    http:
+      paths:
+      - path: /infrastructure-alerts/telegram
+        pathType: Exact
+        backend:
+          service:
+            name: grafana-telegram-relay
+            port: {number: 9103}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: grafana-telegram-relay
+  namespace: default
+spec:
+  podSelector:
+    matchLabels: {app: grafana-telegram-relay}
+  policyTypes: [Ingress, Egress]
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels: {kubernetes.io/metadata.name: kube-system}
+      podSelector:
+        matchLabels: {app.kubernetes.io/name: traefik}
+    ports: [{protocol: TCP, port: 9103}]
+  egress:
+  - to:
+    - namespaceSelector:
+        matchLabels: {kubernetes.io/metadata.name: kube-system}
+    ports: [{protocol: UDP, port: 53}, {protocol: TCP, port: 53}]

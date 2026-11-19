@@ -1,0 +1,14 @@
+[Unit]
+Description=Update DotaLegacy frontend from a successful master DockerHub build
+After=k3s.service network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 /root/update-frontend-from-master.py --apply
+TimeoutStartSec=540
+Nice=10
+CPUAffinity=0
+CPUQuota=50%
+MemoryMax=384M
+UMask=0077

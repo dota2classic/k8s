@@ -1,0 +1,236 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: kube-state-metrics
+  namespace: default
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: d2c-recovery-metrics
+rules:
+- apiGroups: ['']
+  resources: [nodes, pods, persistentvolumeclaims]
+  verbs: [get, list, watch]
+- apiGroups: [apps]
+  resources: [deployments, statefulsets]
+  verbs: [get, list, watch]
+- apiGroups: [batch]
+  resources: [jobs, cronjobs]
+  verbs: [get, list, watch]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: d2c-recovery-metrics
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: d2c-recovery-metrics
+subjects:
+- kind: ServiceAccount
+  name: kube-state-metrics
+  namespace: default
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: node-exporter
+  namespace: default
+spec:
+  selector:
+    matchLabels: {app: node-exporter}
+  template:
+    metadata:
+      labels: {app: node-exporter}
+    spec:
+      automountServiceAccountToken: false
+      hostNetwork: true
+      hostPID: true
+      nodeSelector:
+        ru.dotaclassic/infra: 'true'
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+        runAsGroup: 65534
+        seccompProfile: {type: RuntimeDefault}
+      containers:
+      - name: exporter
+        image: quay.io/prometheus/node-exporter@sha256:d00a542e409ee618a4edc67da14dd48c5da66726bbd5537ab2af9c1dfc442c8a
+        args:
+        - --web.listen-address=10.42.0.1:9100
+        - --path.rootfs=/host
+        - --path.procfs=/host/proc
+        - --path.sysfs=/host/sys
+        - --collector.filesystem.mount-points-exclude=^/(dev|proc|sys|var/lib/(docker|containerd|kubelet|rancher/k3s))($|/)
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities: {drop: [ALL]}
+        resources:
+          requests: {cpu: 20m, memory: 32Mi}
+          limits: {cpu: 200m, memory: 128Mi}
+        volumeMounts:
+        - {name: host, mountPath: /host, readOnly: true, mountPropagation: HostToContainer}
+      volumes:
+      - name: host
+        hostPath: {path: /, type: Directory}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kube-state-metrics
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {app: kube-state-metrics}
+  template:
+    metadata:
+      labels: {app: kube-state-metrics}
+    spec:
+      serviceAccountName: kube-state-metrics
+      nodeSelector:
+        ru.dotaclassic/infra: 'true'
+      containers:
+      - name: exporter
+        image: registry.k8s.io/kube-state-metrics/kube-state-metrics@sha256:42cfe3723a5f058171c627537fb57a3ea0f26e4380fa18555a95cb1a1b4cfc5b
+        args: ['--resources=nodes,pods,deployments,statefulsets,jobs,cronjobs,persistentvolumeclaims']
+        ports: [{containerPort: 8080}]
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 65534
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities: {drop: [ALL]}
+          seccompProfile: {type: RuntimeDefault}
+        resources:
+          requests: {cpu: 25m, memory: 64Mi}
+          limits: {cpu: 250m, memory: 256Mi}
+        readinessProbe:
+          httpGet: {path: /healthz, port: 8080}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kube-state-metrics
+  namespace: default
+spec:
+  selector: {app: kube-state-metrics}
+  ports: [{port: 8080, targetPort: 8080}]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: metrics-gateway
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {app: metrics-gateway}
+  template:
+    metadata:
+      labels: {app: metrics-gateway}
+    spec:
+      automountServiceAccountToken: false
+      nodeSelector:
+        ru.dotaclassic/infra: 'true'
+      containers:
+      - name: gateway
+        image: node@sha256:12f54cafa58d0e96554ae05871e29663ff7241836377dc9a7916449b8adb062c
+        command: [node, /config/metrics-gateway.js]
+        envFrom:
+        - secretRef: {name: metrics-gateway}
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 999
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities: {drop: [ALL]}
+          seccompProfile: {type: RuntimeDefault}
+        resources:
+          requests: {cpu: 10m, memory: 32Mi}
+          limits: {cpu: 200m, memory: 128Mi}
+        readinessProbe:
+          httpGet: {path: /healthz, port: 9102}
+        volumeMounts:
+        - {name: config, mountPath: /config, readOnly: true}
+      volumes:
+      - name: config
+        configMap: {name: metrics-gateway}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: metrics-gateway
+  namespace: default
+spec:
+  selector: {app: metrics-gateway}
+  ports: [{port: 9102, targetPort: 9102}]
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: infrastructure-metrics
+  namespace: default
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+spec:
+  ingressClassName: traefik
+  tls:
+  - hosts: [api.dotaclassic.ru]
+    secretName: api-tls
+  rules:
+  - host: api.dotaclassic.ru
+    http:
+      paths:
+      - path: /infrastructure-metrics/
+        pathType: Prefix
+        backend:
+          service:
+            name: metrics-gateway
+            port: {number: 9102}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: kube-state-metrics
+  namespace: default
+spec:
+  podSelector:
+    matchLabels: {app: kube-state-metrics}
+  policyTypes: [Ingress]
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels: {app: metrics-gateway}
+    ports: [{protocol: TCP, port: 8080}]
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: metrics-gateway
+  namespace: default
+spec:
+  podSelector:
+    matchLabels: {app: metrics-gateway}
+  policyTypes: [Ingress, Egress]
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels: {kubernetes.io/metadata.name: kube-system}
+      podSelector:
+        matchLabels: {app.kubernetes.io/name: traefik}
+    ports: [{protocol: TCP, port: 9102}]
+  egress:
+  - to:
+    - podSelector:
+        matchLabels: {app: kube-state-metrics}
+    ports: [{protocol: TCP, port: 8080}]
+  - to:
+    - ipBlock: {cidr: 10.42.0.1/32}
+    ports: [{protocol: TCP, port: 9100}]
+  - to:
+    - namespaceSelector:
+        matchLabels: {kubernetes.io/metadata.name: kube-system}
+    ports: [{protocol: UDP, port: 53}, {protocol: TCP, port: 53}]

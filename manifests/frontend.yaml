@@ -1,0 +1,71 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+spec:
+  selector:
+    app: frontend
+  ports:
+  - port: 3000
+    targetPort: 3000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+        stage: backend
+    spec:
+      enableServiceLinks: false
+      automountServiceAccountToken: false
+      nodeSelector:
+        ru.dotaclassic/infra: 'true'
+      containers:
+      - name: frontend
+        image: dota2classic/frontend@sha256:a23df027c01feb0ca53b2d79ea0da33a11dd4a96cd7625abaf3dd210a6ccb801
+        env:
+        - name: NODE_ENV
+          value: production
+        - name: NEXT_TELEMETRY_DISABLED
+          value: '1'
+        - name: API_URL
+          value: https://api.dotaclassic.ru
+        - name: INTERNAL_API_URL
+          value: http://api:6001
+        - name: SOCKET_URL
+          value: wss://api.dotaclassic.ru
+        - name: WIKI_URL
+          value: https://wiki.dotaclassic.ru
+        - name: IS_DEV_VERSION
+          value: 'false'
+        - name: VAPID_PUBLIC_KEY
+          valueFrom:
+            secretKeyRef:
+              name: shared-secrets
+              key: WEBPUSH_PUBLIC_KEY
+        resources:
+          requests:
+            cpu: 60m
+            memory: 180Mi
+          limits:
+            cpu: 1000m
+            memory: 512Mi
+        ports:
+        - containerPort: 3000
+        startupProbe:
+          tcpSocket:
+            port: 3000
+          periodSeconds: 5
+          failureThreshold: 60
+        readinessProbe:
+          tcpSocket:
+            port: 3000
+          periodSeconds: 10

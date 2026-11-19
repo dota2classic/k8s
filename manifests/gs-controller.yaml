@@ -1,0 +1,101 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: gs-controller-sa
+  namespace: default
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: gs-controller-role
+  namespace: gameservers
+rules:
+- apiGroups:
+  - ''
+  resources:
+  - configmaps
+  - pods
+  - secrets
+  verbs:
+  - get
+  - list
+  - create
+  - delete
+  - update
+- apiGroups:
+  - batch
+  resources:
+  - jobs
+  verbs:
+  - get
+  - list
+  - create
+  - delete
+  - update
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: gs-controller-rolebinding
+  namespace: gameservers
+subjects:
+- kind: ServiceAccount
+  name: gs-controller-sa
+  namespace: default
+roleRef:
+  kind: Role
+  name: gs-controller-role
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gs-controller
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gs-controller
+  template:
+    metadata:
+      labels:
+        app: gs-controller
+        prometheus-scrape: 'true'
+    spec:
+      nodeSelector:
+        ru.dotaclassic/infra: 'true'
+      serviceAccountName: gs-controller-sa
+      containers:
+      - name: gs-controller
+        image: dota2classic/gs-controller@sha256:e6d43ae91ee714cb6be8b8b2a4dda7e24941dd9ddbcf178dd018e48dac1a516a
+        imagePullPolicy: IfNotPresent
+        resources:
+          requests:
+            cpu: 30m
+            memory: 64Mi
+          limits:
+            cpu: 500m
+            memory: 256Mi
+        envFrom:
+        - secretRef:
+            name: shared-secrets
+        env:
+        - name: GAMESERVER_EXPIRATION_TIMEOUT
+          value: 2m
+        - name: POD_CHECK_INTERVAL
+          value: 30s
+        - name: APP_NAME
+          value: gs-controller
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /readyz
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 10
+      enableServiceLinks: false

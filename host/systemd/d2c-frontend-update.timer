@@ -1,0 +1,12 @@
+[Unit]
+Description=Check successful frontend master builds every five minutes
+
+[Timer]
+OnBootSec=2min
+OnUnitInactiveSec=5min
+RandomizedDelaySec=30s
+Persistent=true
+Unit=d2c-frontend-update.service
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,10 @@
+[Unit]
+Description=Refresh API egress only for api.telegram.org
+After=k3s.service network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 /root/refresh-telegram-egress.py
+NoNewPrivileges=true
+PrivateTmp=true

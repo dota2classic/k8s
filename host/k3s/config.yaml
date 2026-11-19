@@ -1,0 +1,22 @@
+node-name: d2c-combined-01
+node-ip: 159.195.208.206
+advertise-address: 159.195.208.206
+write-kubeconfig-mode: "0600"
+tls-san:
+  - 159.195.208.206
+cluster-cidr: 10.42.0.0/16
+service-cidr: 10.43.0.0/16
+resolv-conf: /run/systemd/resolve/resolv.conf
+kube-apiserver-arg:
+  - service-node-port-range=20000-20999
+kube-proxy-arg:
+  - nodeport-addresses=127.0.0.0/8
+kubelet-arg:
+  - cpu-manager-policy=static
+  - system-reserved=cpu=200m,memory=384Mi
+  - kube-reserved=cpu=200m,memory=384Mi
+node-label:
+  - ru.dotaclassic/nodeType=gameserver
+  - ru.dotaclassic/gameserver=true
+  - ru.dotaclassic/infra=true
+  - ru.dotaclassic/region=ru_moscow
