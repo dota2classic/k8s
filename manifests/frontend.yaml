@@ -30,7 +30,7 @@ spec:
         ru.dotaclassic/infra: 'true'
       containers:
       - name: frontend
-        image: dota2classic/frontend@sha256:a23df027c01feb0ca53b2d79ea0da33a11dd4a96cd7625abaf3dd210a6ccb801
+        image: dota2classic/frontend@sha256:dfc8e893f655985cc61538e3cbda9641d0a971e83b73e261d15df03cddb6a7f9
         env:
         - name: NODE_ENV
           value: production
