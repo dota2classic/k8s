@@ -24,13 +24,18 @@ data:
       gzip_min_length 1024;
       gzip_comp_level 5;
       gzip_vary on;
+      upstream launcher_origin {
+        server 141.105.71.200:443;
+        keepalive 32;
+        keepalive_timeout 60s;
+      }
       server {
         listen 8080;
         server_name _;
         location = /healthz { access_log off; return 200 'ok'; }
         location /files/ {
           limit_except GET HEAD { deny all; }
-          proxy_pass https://141.105.71.200;
+          proxy_pass https://launcher_origin;
           proxy_http_version 1.1;
           proxy_set_header Host launcher-origin.dotaclassic.ru;
           proxy_set_header Connection "";
@@ -48,7 +53,7 @@ data:
           proxy_max_temp_file_size 0;
           proxy_redirect off;
           location = /files/core/manifest.json {
-            proxy_pass https://141.105.71.200;
+            proxy_pass https://launcher_origin;
             proxy_cache metadata;
             proxy_cache_lock on;
             proxy_cache_revalidate on;
@@ -79,7 +84,7 @@ spec:
     metadata:
       labels: {app: launcher-proxy}
       annotations:
-        ru.dotaclassic/config-revision: download-memory-fix
+        ru.dotaclassic/config-revision: upstream-keepalive
         kubernetes.io/egress-bandwidth: 60M
     spec:
       automountServiceAccountToken: false
@@ -91,6 +96,9 @@ spec:
         runAsGroup: 101
         fsGroup: 101
         seccompProfile: {type: RuntimeDefault}
+        sysctls:
+        - {name: net.ipv4.tcp_wmem, value: "4096 65536 4194304"}
+        - {name: net.ipv4.tcp_rmem, value: "4096 87380 4194304"}
       containers:
       - name: nginx
         image: nginx@sha256:09369da6b10306312cd908661320086bf87fbae1b6b0c49a1f50ba531fef2eab
