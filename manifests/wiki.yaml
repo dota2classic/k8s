@@ -1,0 +1,96 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: wiki
+  namespace: default
+spec:
+  selector:
+    app: wiki
+  ports:
+  - port: 3000
+    targetPort: 3000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wiki
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: wiki
+  template:
+    metadata:
+      labels:
+        app: wiki
+        stage: backend
+    spec:
+      enableServiceLinks: false
+      automountServiceAccountToken: false
+      nodeSelector:
+        ru.dotaclassic/infra: 'true'
+      containers:
+      - name: wiki
+        image: dota2classic/wiki@sha256:526d9ee23df6231e23edb9c2d5e793924001f06e1a40421c666a49dcb0bc9097
+        resources:
+          requests:
+            cpu: 10m
+            memory: 64Mi
+          limits:
+            memory: 192Mi
+        ports:
+        - containerPort: 3000
+        startupProbe:
+          tcpSocket:
+            port: 3000
+          periodSeconds: 5
+          failureThreshold: 30
+        readinessProbe:
+          tcpSocket:
+            port: 3000
+          periodSeconds: 10
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: wiki
+  namespace: default
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+spec:
+  ingressClassName: traefik
+  tls:
+  - hosts: [wiki.dotaclassic.ru]
+    secretName: wiki-tls
+  rules:
+  - host: wiki.dotaclassic.ru
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: wiki
+            port: {number: 3000}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: wiki-http
+  namespace: default
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web
+    traefik.ingress.kubernetes.io/router.middlewares: default-frontend-https@kubernetescrd
+spec:
+  ingressClassName: traefik
+  rules:
+  - host: wiki.dotaclassic.ru
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: wiki
+            port: {number: 3000}
