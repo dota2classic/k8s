@@ -25,14 +25,12 @@ spec:
       labels:
         app: api
         stage: backend
-      annotations:
-        recovery.dotaclassic/image-digest: sha256:33f0dded10aa7de1eb66832868ada4d78e99037b72f47bc86199067d2aeb8879
     spec:
       enableServiceLinks: false
       automountServiceAccountToken: false
       containers:
       - name: api
-        image: docker.io/dota2classic/gateway:recovery-no-twitch-20261119
+        image: dota2classic/gateway@sha256:4960718452cc14df7de9a562fc4ab4cc32ef8c9c1ae8b95f6ad87e5e2bf75f0b
         envFrom:
         - secretRef:
             name: shared-secrets
@@ -78,4 +76,3 @@ spec:
           tcpSocket:
             port: 6001
           periodSeconds: 10
-        imagePullPolicy: Never
