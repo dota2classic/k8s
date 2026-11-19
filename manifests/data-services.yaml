@@ -219,21 +219,15 @@ spec:
             cpu: 500m
             memory: 512Mi
         readinessProbe:
-          exec:
-            command:
-            - rabbitmq-diagnostics
-            - -q
-            - check_running
+          tcpSocket:
+            port: 5672
           periodSeconds: 15
-          timeoutSeconds: 10
+          timeoutSeconds: 5
         startupProbe:
-          exec:
-            command:
-            - rabbitmq-diagnostics
-            - -q
-            - ping
+          tcpSocket:
+            port: 5672
           periodSeconds: 10
-          timeoutSeconds: 10
+          timeoutSeconds: 5
           failureThreshold: 30
         command:
         - sh
