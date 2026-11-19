@@ -28,7 +28,7 @@ spec:
         [JSONPatch{op: 'add', path: '/spec/containers/0/resources', value:
           {'requests': {'cpu': '50m', 'memory': '128Mi'}, 'limits': {'memory': '256Mi'}}},
          JSONPatch{op: 'add', path: '/spec/containers/1/resources', value:
-          {'requests': {'cpu': '400m', 'memory': '512Mi'}, 'limits': {'memory': '1Gi'}}}]
+          {'requests': {'cpu': '700m', 'memory': '512Mi'}, 'limits': {'memory': '1Gi'}}}]
 ---
 apiVersion: admissionregistration.k8s.io/v1
 kind: MutatingAdmissionPolicyBinding
