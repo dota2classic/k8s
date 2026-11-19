@@ -1,0 +1,146 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: alloy-config
+  namespace: default
+data:
+  config.alloy: |
+    faro.receiver "default" {
+      server {
+        listen_address       = "0.0.0.0"
+        listen_port          = 12347
+        cors_allowed_origins = ["https://dotaclassic.ru", "https://www.dotaclassic.ru", "https://en.dotaclassic.ru"]
+        rate_limiting {
+          strategy = "per_app"
+        }
+      }
+      output {
+        logs = [loki.write.default.receiver]
+      }
+    }
+
+    loki.write "default" {
+      endpoint {
+        url = "http://141.105.71.200:3100/loki/api/v1/push"
+      }
+      external_labels = {
+        source = "faro",
+        env    = "prod",
+      }
+    }
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: alloy-loki-egress
+  namespace: default
+spec:
+  podSelector:
+    matchLabels:
+      app: alloy
+  policyTypes: [Egress]
+  egress:
+  - to:
+    - ipBlock:
+        cidr: 141.105.71.200/32
+    ports:
+    - protocol: TCP
+      port: 3100
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: alloy
+  namespace: default
+spec:
+  selector:
+    app: alloy
+  ports:
+  - name: faro
+    port: 12347
+    targetPort: 12347
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: alloy
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: alloy
+  template:
+    metadata:
+      labels:
+        app: alloy
+        stage: backend
+      annotations:
+        ru.dotaclassic/config-revision: faro-loki
+    spec:
+      enableServiceLinks: false
+      automountServiceAccountToken: false
+      nodeSelector:
+        ru.dotaclassic/infra: 'true'
+      containers:
+      - name: alloy
+        image: grafana/alloy@sha256:8ab871206bd2d8f89277f53abffee5f452a293980788d52f85fa183a87a505a4
+        args:
+        - run
+        - /etc/alloy/config.alloy
+        - --server.http.listen-addr=0.0.0.0:12345
+        - --storage.path=/var/lib/alloy/data
+        - --disable-reporting
+        env:
+        - name: GOMEMLIMIT
+          value: 200MiB
+        resources:
+          requests:
+            cpu: 20m
+            memory: 96Mi
+          limits:
+            memory: 256Mi
+        ports:
+        - name: faro
+          containerPort: 12347
+        - name: http
+          containerPort: 12345
+        readinessProbe:
+          httpGet:
+            path: /-/ready
+            port: 12345
+          periodSeconds: 10
+        volumeMounts:
+        - name: config
+          mountPath: /etc/alloy
+        - name: data
+          mountPath: /var/lib/alloy/data
+      volumes:
+      - name: config
+        configMap:
+          name: alloy-config
+      - name: data
+        emptyDir: {}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: alloy
+  namespace: default
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+spec:
+  ingressClassName: traefik
+  tls:
+  - hosts: [logsink.dotaclassic.ru]
+    secretName: alloy-tls
+  rules:
+  - host: logsink.dotaclassic.ru
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: alloy
+            port: {number: 12347}
