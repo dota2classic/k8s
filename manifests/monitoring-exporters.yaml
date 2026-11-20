@@ -63,6 +63,7 @@ spec:
         - --path.procfs=/host/proc
         - --path.sysfs=/host/sys
         - --collector.filesystem.mount-points-exclude=^/(dev|proc|sys|var/lib/(docker|containerd|kubelet|rancher/k3s))($|/)
+        - --collector.textfile.directory=/host/var/lib/node_exporter/textfile_collector
         securityContext:
           allowPrivilegeEscalation: false
           readOnlyRootFilesystem: true
