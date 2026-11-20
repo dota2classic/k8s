@@ -30,7 +30,7 @@ spec:
       automountServiceAccountToken: false
       containers:
       - name: forum
-        image: dota2classic/forum@sha256:4845340568f2d65526663350754a4971b79f6cc3240a000bf5e7e30ef4259339
+        image: dota2classic/forum@sha256:39070a58970156a101b6a0c5da28e70fecd2744d3fb52f07df624525d34f124d
         envFrom:
         - secretRef:
             name: shared-secrets
