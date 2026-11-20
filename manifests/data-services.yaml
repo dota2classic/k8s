@@ -46,6 +46,8 @@ spec:
         volumeMounts:
         - name: data
           mountPath: /var/lib/postgresql/data
+        - name: dshm
+          mountPath: /dev/shm
         resources:
           requests:
             cpu: 120m
@@ -73,6 +75,11 @@ spec:
       securityContext:
         runAsUser: 999
         runAsGroup: 999
+      volumes:
+      - name: dshm
+        emptyDir:
+          medium: Memory
+          sizeLimit: 512Mi
   volumeClaimTemplates:
   - metadata:
       name: data
