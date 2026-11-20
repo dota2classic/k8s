@@ -56,7 +56,7 @@ spec:
         ru.dotaclassic/infra: 'true'
       containers:
       - name: gameserver
-        image: dota2classic/gameserver@sha256:9973a26e809fa5bc17a5b9f0dde7266c5ec184e35361f39795111fd66a21fc1a
+        image: dota2classic/gameserver@sha256:951ac4bcf7e2aab76f045fa75b4bb6316265b326489b80b8c7bcb2822b883678
         envFrom:
         - secretRef:
             name: shared-secrets
@@ -174,7 +174,7 @@ spec:
         ru.dotaclassic/infra: 'true'
       containers:
       - name: matchmaker
-        image: dota2classic/matchmaker@sha256:a25438bfbd7d6d66d6083a19ba900ec3b33df14e80f23c084c0a81327f3920ca
+        image: dota2classic/matchmaker@sha256:d51c56d529988495a5b268b698adca17a935ee7a1876c2cbfc9559fa968a2592
         envFrom:
         - secretRef:
             name: shared-secrets
