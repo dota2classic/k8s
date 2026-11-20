@@ -132,7 +132,7 @@ spec:
         - -ec
         args:
         - exec redis-server --requirepass "$REDIS_PASSWORD" --dir /data --appendonly
-          yes --appendfsync everysec --maxmemory 128mb --maxmemory-policy noeviction
+          yes --appendfsync everysec --maxmemory 128mb --maxmemory-policy volatile-lru
         volumeMounts:
         - name: data
           mountPath: /data
