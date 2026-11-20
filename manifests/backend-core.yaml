@@ -115,7 +115,7 @@ spec:
         ru.dotaclassic/infra: 'true'
       containers:
       - name: user
-        image: dota2classic/user@sha256:c79ac9e714392b0b580d76fd806ed77869876fe34163cfb351fd21d8b9b95c32
+        image: dota2classic/user@sha256:d2dd75bc481065091600dfabc8779ddc538f75fac9f39da055e490a69a7e2dc5
         envFrom:
         - secretRef:
             name: shared-secrets

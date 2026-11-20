@@ -30,7 +30,7 @@ spec:
       automountServiceAccountToken: false
       containers:
       - name: api
-        image: dota2classic/gateway@sha256:845476e9c4499f49ae3d8f562ac45842f47224a7cb27ffeb4462b859685537a4
+        image: dota2classic/gateway@sha256:521d72e493adb1a9bd1302022ebb462b2395607d8d410313ef4558db3621349e
         envFrom:
         - secretRef:
             name: shared-secrets
