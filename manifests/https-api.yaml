@@ -13,6 +13,10 @@ spec:
     - http01:
         ingress:
           ingressClassName: traefik
+          ingressTemplate:
+            metadata:
+              annotations:
+                traefik.ingress.kubernetes.io/router.entrypoints: web
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress

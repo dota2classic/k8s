@@ -24,6 +24,11 @@ data:
       gzip_min_length 1024;
       gzip_comp_level 5;
       gzip_vary on;
+      ssl_protocols TLSv1.2 TLSv1.3;
+      ssl_session_cache shared:launcher_tls:10m;
+      ssl_session_timeout 1h;
+      map $ssl_server_name $launcher_tls_certificate { default /etc/nginx/tls/tls.crt; }
+      map $ssl_server_name $launcher_tls_key { default /etc/nginx/tls/tls.key; }
       upstream launcher_origin {
         server 141.105.71.200:443;
         keepalive 32;
@@ -31,6 +36,9 @@ data:
       }
       server {
         listen 8080;
+        listen 8443 ssl;
+        ssl_certificate $launcher_tls_certificate;
+        ssl_certificate_key $launcher_tls_key;
         server_name _;
         location = /healthz { access_log off; return 200 'ok'; }
         location /files/ {
@@ -84,7 +92,7 @@ spec:
     metadata:
       labels: {app: launcher-proxy}
       annotations:
-        ru.dotaclassic/config-revision: upstream-keepalive
+        ru.dotaclassic/config-revision: tls-passthrough
         kubernetes.io/egress-bandwidth: 60M
     spec:
       automountServiceAccountToken: false
@@ -97,13 +105,13 @@ spec:
         fsGroup: 101
         seccompProfile: {type: RuntimeDefault}
         sysctls:
-        - {name: net.ipv4.tcp_wmem, value: "4096 65536 4194304"}
-        - {name: net.ipv4.tcp_rmem, value: "4096 87380 4194304"}
+        - {name: net.ipv4.tcp_wmem, value: "4096 65536 1048576"}
+        - {name: net.ipv4.tcp_rmem, value: "4096 87380 1048576"}
       containers:
       - name: nginx
         image: nginx@sha256:09369da6b10306312cd908661320086bf87fbae1b6b0c49a1f50ba531fef2eab
         command: [nginx, '-g', 'daemon off;']
-        ports: [{containerPort: 8080}]
+        ports: [{containerPort: 8080}, {containerPort: 8443}]
         securityContext:
           allowPrivilegeEscalation: false
           readOnlyRootFilesystem: true
@@ -121,11 +129,14 @@ spec:
         volumeMounts:
         - {name: config, mountPath: /etc/nginx/nginx.conf, subPath: nginx.conf, readOnly: true}
         - {name: temporary, mountPath: /tmp}
+        - {name: tls, mountPath: /etc/nginx/tls, readOnly: true}
       volumes:
       - name: config
         configMap: {name: launcher-proxy}
       - name: temporary
         emptyDir: {sizeLimit: 32Mi}
+      - name: tls
+        secret: {secretName: launcher-tls}
 ---
 apiVersion: v1
 kind: Service
@@ -134,7 +145,9 @@ metadata:
   namespace: default
 spec:
   selector: {app: launcher-proxy}
-  ports: [{port: 8080, targetPort: 8080}]
+  ports:
+  - {name: http, port: 8080, targetPort: 8080}
+  - {name: https, port: 8443, targetPort: 8443}
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -151,32 +164,23 @@ spec:
         matchLabels: {kubernetes.io/metadata.name: kube-system}
       podSelector:
         matchLabels: {app.kubernetes.io/name: traefik}
-    ports: [{protocol: TCP, port: 8080}]
+    ports: [{protocol: TCP, port: 8080}, {protocol: TCP, port: 8443}]
   egress:
   - to:
     - ipBlock: {cidr: 141.105.71.200/32}
     ports: [{protocol: TCP, port: 443}]
 ---
-apiVersion: networking.k8s.io/v1
-kind: Ingress
+apiVersion: traefik.io/v1alpha1
+kind: IngressRouteTCP
 metadata:
-  name: launcher
+  name: launcher-tls-passthrough
   namespace: default
-  annotations:
-    cert-manager.io/cluster-issuer: letsencrypt-prod
-    traefik.ingress.kubernetes.io/router.entrypoints: websecure
 spec:
-  ingressClassName: traefik
+  entryPoints: [websecure]
+  routes:
+  - match: HostSNI(`launcher.dotaclassic.ru`)
+    services:
+    - name: launcher-proxy
+      port: 8443
   tls:
-  - hosts: [launcher.dotaclassic.ru]
-    secretName: launcher-tls
-  rules:
-  - host: launcher.dotaclassic.ru
-    http:
-      paths:
-      - path: /files/
-        pathType: Prefix
-        backend:
-          service:
-            name: launcher-proxy
-            port: {number: 8080}
+    passthrough: true
