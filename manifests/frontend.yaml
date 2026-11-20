@@ -53,7 +53,7 @@ spec:
               key: WEBPUSH_PUBLIC_KEY
         resources:
           requests:
-            cpu: 300m
+            cpu: 120m
             memory: 180Mi
           limits:
             memory: 512Mi

@@ -48,7 +48,7 @@ spec:
           mountPath: /var/lib/postgresql/data
         resources:
           requests:
-            cpu: 300m
+            cpu: 120m
             memory: 1Gi
           limits:
             memory: 2Gi
@@ -214,7 +214,7 @@ spec:
           mountPath: /var/lib/rabbitmq
         resources:
           requests:
-            cpu: 50m
+            cpu: 20m
             memory: 256Mi
           limits:
             cpu: 500m

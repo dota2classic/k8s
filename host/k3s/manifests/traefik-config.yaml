@@ -7,7 +7,7 @@ spec:
   valuesContent: |-
     resources:
       requests:
-        cpu: 150m
+        cpu: 60m
         memory: 192Mi
     service:
       spec:
