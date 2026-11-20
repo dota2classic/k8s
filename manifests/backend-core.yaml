@@ -174,7 +174,7 @@ spec:
         ru.dotaclassic/infra: 'true'
       containers:
       - name: matchmaker
-        image: dota2classic/matchmaker@sha256:d51c56d529988495a5b268b698adca17a935ee7a1876c2cbfc9559fa968a2592
+        image: dota2classic/matchmaker@sha256:e53d93772066f44b223e14285e7c8864127cba85c126669fe7e25553d6d24a87
         envFrom:
         - secretRef:
             name: shared-secrets
