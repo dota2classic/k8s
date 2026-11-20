@@ -56,7 +56,7 @@ spec:
         ru.dotaclassic/infra: 'true'
       containers:
       - name: gameserver
-        image: dota2classic/gameserver@sha256:951ac4bcf7e2aab76f045fa75b4bb6316265b326489b80b8c7bcb2822b883678
+        image: dota2classic/gameserver@sha256:96ad4646eaffa66e79be40dee4c4382f9343334ccfa0ce06130c548371130b1d
         envFrom:
         - secretRef:
             name: shared-secrets
