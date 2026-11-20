@@ -87,3 +87,32 @@ spec:
           service:
             name: frontend
             port: {number: 3000}
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: crawler-ratelimit
+  namespace: default
+spec:
+  rateLimit:
+    average: 10
+    period: 1m
+    burst: 5
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: frontend-crawlers
+  namespace: default
+spec:
+  entryPoints: [websecure]
+  routes:
+  - match: (Host(`dotaclassic.ru`) || Host(`www.dotaclassic.ru`) || Host(`en.dotaclassic.ru`)) && HeaderRegexp(`User-Agent`, `(?i)(GPTBot|OAI-SearchBot|ClaudeBot|CCBot|Bytespider|Amazonbot|meta-externalagent|AhrefsBot|SemrushBot|MJ12bot|PetalBot|DotBot|DataForSeoBot)`)
+    kind: Rule
+    middlewares:
+    - name: crawler-ratelimit
+    services:
+    - name: frontend
+      port: 3000
+  tls:
+    secretName: frontend-tls
