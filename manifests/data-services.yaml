@@ -50,7 +50,7 @@ spec:
           mountPath: /dev/shm
         resources:
           requests:
-            cpu: 120m
+            cpu: 55m
             memory: 1Gi
           limits:
             memory: 2Gi
