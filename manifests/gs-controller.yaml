@@ -72,7 +72,7 @@ spec:
       serviceAccountName: gs-controller-sa
       containers:
       - name: gs-controller
-        image: dota2classic/gs-controller@sha256:e03c82658401b0ec358a633c682869f5eb4f36c3db2a55c2185c207a675077f8
+        image: dota2classic/gs-controller@sha256:0e249770d8f174f351da5d605659229cf4ff259e7c5b182b35589c98277f60b4
         imagePullPolicy: IfNotPresent
         resources:
           requests:
@@ -91,6 +91,8 @@ spec:
           value: 30s
         - name: APP_NAME
           value: gs-controller
+        - name: SIDECAR_IMAGE
+          value: dota2classic/srcds-sidecar@sha256:d07fcc570843b4249b6c52bdef431d7a2efb8f09d670154576d7ed489598bb51
         livenessProbe:
           httpGet:
             path: /healthz
