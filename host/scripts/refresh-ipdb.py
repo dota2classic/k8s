@@ -1,7 +1,7 @@
 import gzip,os,pathlib,urllib.request
 target=pathlib.Path('/var/lib/d2c/ipdb')
 x4b='https://raw.githubusercontent.com/X4BNet/lists_vpn/main/'
-extra_hosting_asns=['AS210644 # AEZA','AS9123 # TimeWeb','AS197695 # REG.RU','AS198610 # Beget','AS44812 # IP Server','AS50340 # Selectel MSK','AS13335 # Cloudflare WARP']
+extra_hosting_asns=['AS210644 # AEZA','AS9123 # TimeWeb','AS197695 # REG.RU','AS198610 # Beget','AS44812 # IP Server','AS50340 # Selectel MSK','AS13335 # Cloudflare WARP','AS47764 # VK Cloud','AS200350 # Yandex Cloud','AS208677 # Cloud.ru','AS49505 # Selectel SPB','AS57578 # Misaka Network']
 def fetch(url):
     with urllib.request.urlopen(urllib.request.Request(url,headers={'User-Agent':'d2c-ipdb-refresh'}),timeout=120) as r:return r.read()
 def lines(data):return [l for l in data.decode().splitlines() if l.strip()]
