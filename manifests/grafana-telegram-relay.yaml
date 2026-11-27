@@ -1,3 +1,51 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-telegram-relay
+  namespace: default
+data:
+  relay.js: |
+    'use strict';
+    const http=require('node:http'),https=require('node:https'),crypto=require('node:crypto');
+    const token=process.env.TELEGRAM_TOKEN,auth=Buffer.from('Bearer '+process.env.RELAY_TOKEN);
+    const chat=process.env.ALERT_CHAT_ID,topic=Number(process.env.ALERT_THREAD_ID);
+    if(!token||!process.env.RELAY_TOKEN||chat!=='-1002345045179'||!Number.isSafeInteger(topic)||topic<=0||topic===3982)throw Error('Invalid fixed relay configuration');
+    const recent=new Map();
+    function telegram(method,payload){return new Promise((resolve,reject)=>{
+     const body=JSON.stringify(payload||{});
+     const request=https.request({hostname:'api.telegram.org',method:'POST',path:'/bot'+token+'/'+method,headers:{'content-type':'application/json','content-length':Buffer.byteLength(body)},timeout:12000},response=>{
+      let value='';response.on('data',chunk=>{value+=chunk;if(value.length>65536)response.destroy(Error('Unexpected Telegram response'));});
+      response.on('end',()=>{try{const parsed=JSON.parse(value);if(response.statusCode!==200||!parsed.ok)reject(Error('Telegram rejected request'));else resolve(parsed.result);}catch{reject(Error('Invalid Telegram response'));}});
+      response.on('error',()=>reject(Error('Telegram response interrupted')));
+     });
+     request.on('timeout',()=>request.destroy(Error('Telegram timeout')));request.on('error',()=>reject(Error('Telegram unavailable')));request.end(body);
+    });}
+    http.createServer(async(request,response)=>{
+     if(request.url==='/healthz'){response.end('ok');return;}
+     const received=Buffer.from(request.headers.authorization||'');
+     if(received.length!==auth.length||!crypto.timingSafeEqual(received,auth)){request.resume();response.writeHead(401);response.end();return;}
+     if(request.url!=='/infrastructure-alerts/telegram'){request.resume();response.writeHead(404);response.end();return;}
+     try{
+      if(request.method==='GET'){
+       const identity=await telegram('getMe');const group=await telegram('getChat',{chat_id:chat});
+       if(identity.username.toLowerCase()!=='dota2classic_alerts_bot'||!group.is_forum)throw Error('Unexpected bot/group');
+       response.setHeader('content-type','application/json');response.end(JSON.stringify({bot:identity.username,alertTopic:topic,telegramReachable:true,messagesSent:0}));return;
+      }
+      if(request.method!=='POST'){response.writeHead(405);response.end();return;}
+      let body='';for await(const part of request){body+=part;if(Buffer.byteLength(body)>262144){response.writeHead(413);response.end();return;}}
+      let payload;try{payload=JSON.parse(body);}catch{response.writeHead(400);response.end();return;}
+      if(!['firing','resolved'].includes(payload.status)||!Array.isArray(payload.alerts)||payload.alerts.length<1||payload.alerts.length>100){response.writeHead(400);response.end();return;}
+      const key=crypto.createHash('sha256').update(body).digest('hex');const now=Date.now();
+      for(const [k,time] of recent)if(now-time>300000)recent.delete(k);
+      if(recent.has(key)){response.end('ok');return;}
+      const title=String(payload.title||'[DotaLegacy] '+payload.status.toUpperCase()).slice(0,300);
+      const detail=payload.message||payload.alerts.map(alert=>String(alert.annotations?.summary||alert.labels?.alertname||'Alert')+'\n'+String(alert.valueString||'')).join('\n\n');
+      const text=(title+'\n\n'+String(detail)).slice(0,4000);
+      await telegram('sendMessage',{chat_id:chat,message_thread_id:topic,text,disable_web_page_preview:process.env.ALERT_DISABLE_PREVIEW==='true',disable_notification:process.env.ALERT_SILENT==='true',protect_content:process.env.ALERT_PROTECT_CONTENT==='true'});
+      if(recent.size>1000)recent.clear();recent.set(key,now);response.end('ok');
+     }catch{if(!response.headersSent)response.writeHead(502);response.end('Telegram delivery unavailable');}
+    }).listen(9103,'0.0.0.0');
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
