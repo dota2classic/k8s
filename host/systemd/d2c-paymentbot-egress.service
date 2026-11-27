@@ -1,0 +1,8 @@
+[Unit]
+Description=Refresh HTTPS egress for subscription bot Telegram API
+After=k3s.service network-online.target
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 /root/refresh-paymentbot-egress.py
+NoNewPrivileges=true
+PrivateTmp=true
