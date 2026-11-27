@@ -13,6 +13,11 @@ data:
       log_format download '$time_iso8601 "$request" status=$status bytes=$body_bytes_sent request_seconds=$request_time upstream_seconds=$upstream_response_time cache=$upstream_cache_status';
       access_log /dev/stdout download;
       proxy_cache_path /tmp/metadata-cache levels=1:2 keys_zone=metadata:1m max_size=16m inactive=1h use_temp_path=off;
+      proxy_cache_path /var/cache/launcher levels=1:2 keys_zone=game_files:8m max_size=20g min_free=45g inactive=7d use_temp_path=off;
+      map "$request_method:$http_range" $skip_game_cache {
+        default 1;
+        "GET:" 0;
+      }
       client_body_temp_path /tmp/client_temp;
       proxy_temp_path /tmp/proxy_temp;
       fastcgi_temp_path /tmp/fastcgi_temp;
@@ -60,6 +65,21 @@ data:
           proxy_buffering off;
           proxy_max_temp_file_size 0;
           proxy_redirect off;
+          location ~* ^/files/core/.*\.vpk$ {
+            proxy_pass https://launcher_origin;
+            proxy_buffering on;
+            proxy_cache game_files;
+            proxy_cache_key $uri;
+            proxy_cache_bypass $skip_game_cache;
+            proxy_no_cache $skip_game_cache;
+            proxy_cache_lock on;
+            proxy_cache_lock_timeout 10s;
+            proxy_cache_lock_age 120s;
+            proxy_cache_revalidate on;
+            proxy_cache_valid 200 2m;
+            proxy_ignore_headers Cache-Control Expires;
+            add_header X-Launcher-Cache $upstream_cache_status always;
+          }
           location = /files/core/manifest.json {
             proxy_pass https://launcher_origin;
             proxy_cache metadata;
@@ -79,6 +99,17 @@ data:
       }
     }
 ---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: launcher-game-cache
+  namespace: default
+spec:
+  accessModes: [ReadWriteOnce]
+  storageClassName: local-path
+  resources:
+    requests: {storage: 24Gi}
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -92,8 +123,8 @@ spec:
     metadata:
       labels: {app: launcher-proxy}
       annotations:
-        ru.dotaclassic/config-revision: tls-passthrough
-        kubernetes.io/egress-bandwidth: 60M
+        ru.dotaclassic/config-revision: game-files-cache-v1
+        kubernetes.io/egress-bandwidth: 100M
     spec:
       automountServiceAccountToken: false
       nodeSelector:
@@ -130,6 +161,7 @@ spec:
         - {name: config, mountPath: /etc/nginx/nginx.conf, subPath: nginx.conf, readOnly: true}
         - {name: temporary, mountPath: /tmp}
         - {name: tls, mountPath: /etc/nginx/tls, readOnly: true}
+        - {name: game-cache, mountPath: /var/cache/launcher}
       volumes:
       - name: config
         configMap: {name: launcher-proxy}
@@ -137,6 +169,8 @@ spec:
         emptyDir: {sizeLimit: 32Mi}
       - name: tls
         secret: {secretName: launcher-tls}
+      - name: game-cache
+        persistentVolumeClaim: {claimName: launcher-game-cache}
 ---
 apiVersion: v1
 kind: Service
