@@ -1,0 +1,7 @@
+[Unit]
+Description=Refresh subscription bot Telegram addresses
+[Timer]
+OnBootSec=60s
+OnUnitActiveSec=60s
+[Install]
+WantedBy=timers.target

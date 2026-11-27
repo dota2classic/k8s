@@ -120,6 +120,35 @@ spec:
   selector: {app: kube-state-metrics}
   ports: [{port: 8080, targetPort: 8080}]
 ---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: metrics-gateway
+  namespace: default
+data:
+  metrics-gateway.js: |
+    'use strict';
+    const http=require('node:http'),crypto=require('node:crypto');
+    const expected=Buffer.from('Bearer '+process.env.METRICS_TOKEN);
+    if(!process.env.METRICS_TOKEN||process.env.METRICS_TOKEN.length<40)throw Error('Missing metrics credential');
+    const targets={
+     '/infrastructure-metrics/node':{hostname:'10.42.0.1',port:9100},
+     '/infrastructure-metrics/cluster':{hostname:'kube-state-metrics.default.svc.cluster.local',port:8080},
+    };
+    http.createServer((request,response)=>{
+     if(request.url==='/healthz'){response.writeHead(200);response.end('ok');return;}
+     const received=Buffer.from(request.headers.authorization||'');
+     if(received.length!==expected.length||!crypto.timingSafeEqual(received,expected)){response.writeHead(401);response.end();return;}
+     const target=targets[request.url];
+     if(request.method!=='GET'||!target){response.writeHead(404);response.end();return;}
+     const upstream=http.get({...target,path:'/metrics',timeout:10000},result=>{
+      response.writeHead(result.statusCode,{'Content-Type':result.headers['content-type']||'text/plain','Cache-Control':'no-store'});result.pipe(response);
+     });
+     upstream.on('timeout',()=>upstream.destroy(Error('Metrics upstream timeout')));
+     upstream.on('error',()=>{if(!response.headersSent)response.writeHead(502);response.end();});
+     response.on('close',()=>upstream.destroy());
+    }).listen(9102,'0.0.0.0');
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:

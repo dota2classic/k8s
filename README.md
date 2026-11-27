@@ -18,7 +18,9 @@ Secret values are never stored here. Manifests reference the in-cluster secrets 
 ## Notes
 
 - StatefulSets in `manifests/data-services.yaml` use `updateStrategy: OnDelete`: delete the pod to roll out a change.
-- The ipBlocks of the `api-external-integrations` and `api-telegram-egress` NetworkPolicies are rewritten every minute by the `d2c-steam-egress` and `d2c-telegram-egress` timers.
+- The ipBlocks of the `api-external-integrations` NetworkPolicy are rewritten every minute by the `d2c-steam-egress` timer.
+- The `api-telegram-egress`, `grafana-telegram-relay-egress` and `paymentbot-telegram-egress` NetworkPolicies are generated every minute by the `d2c-telegram-egress` and `d2c-paymentbot-egress` timers and have no manifest.
+- Every unit in `host/systemd` with an `[Install]` section is enabled; the others are started by their timers.
 - The frontend image is deployed by the `d2c-frontend-update` timer from successful `master` builds.
 - cert-manager v1.21.3 is installed from the upstream release manifest.
 - Changing the kubelet CPU manager policy requires: no Guaranteed pods running, stop k3s, delete `/var/lib/kubelet/cpu_manager_state`, edit `host/k3s/config.yaml`, start k3s.
