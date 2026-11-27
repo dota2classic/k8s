@@ -1,0 +1,12 @@
+[Unit]
+Description=Refresh offline IP to ASN and hosting/VPN lists for game sidecars
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 /root/refresh-ipdb.py
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+StateDirectory=d2c/ipdb

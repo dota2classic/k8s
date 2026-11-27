@@ -1,0 +1,10 @@
+[Unit]
+Description=Refresh game sidecar IP database daily
+[Timer]
+OnBootSec=5min
+OnCalendar=daily
+RandomizedDelaySec=1h
+Persistent=true
+Unit=d2c-ipdb-refresh.service
+[Install]
+WantedBy=timers.target
