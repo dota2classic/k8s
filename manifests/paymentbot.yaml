@@ -1,0 +1,84 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: paymentbot-console-logging
+  namespace: default
+data:
+  console-logging.cjs: |
+    // The legacy configuration omits fluentbit.disabled. Keep console logging;
+    // Alloy already collects container stdout, so no forward transport is needed.
+    const configuration = require('/dist/config/configuration.js');
+    const original = configuration.default;
+    configuration.default = () => {
+      const config = original();
+      return { ...config, fluentbit: { ...config.fluentbit, disabled: true } };
+    };
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: paymentbot
+  namespace: default
+spec:
+  replicas: 1
+  strategy: {type: Recreate}
+  selector:
+    matchLabels: {app: paymentbot}
+  template:
+    metadata:
+      labels: {app: paymentbot}
+    spec:
+      enableServiceLinks: false
+      automountServiceAccountToken: false
+      nodeSelector:
+        ru.dotaclassic/infra: 'true'
+      containers:
+      - name: paymentbot
+        image: dota2classic/payment@sha256:a893eda3bbcd2681be59fce3393da0ab94f7ec90800cd3b467299b7dd8408dd1
+        env:
+        - name: TELEGRAM_PAYMENT_TOKEN
+          valueFrom:
+            secretKeyRef: {name: paymentbot-secrets, key: TELEGRAM_PAYMENT_TOKEN}
+        - {name: POSTGRES_HOST, value: postgres}
+        - {name: POSTGRES_PORT, value: '5432'}
+        - name: POSTGRES_USERNAME
+          valueFrom:
+            secretKeyRef: {name: shared-secrets, key: POSTGRES_USERNAME}
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef: {name: shared-secrets, key: POSTGRES_PASSWORD}
+        - {name: NODE_ENV, value: production}
+        - {name: APP_NAME, value: paymentbot}
+        - {name: NODE_OPTIONS, value: --require=/runtime/console-logging.cjs}
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities: {drop: [ALL]}
+        resources:
+          requests: {cpu: 10m, memory: 96Mi}
+          limits: {cpu: 200m, memory: 256Mi}
+        volumeMounts:
+        - {name: console-logging, mountPath: /runtime, readOnly: true}
+      volumes:
+      - name: console-logging
+        configMap: {name: paymentbot-console-logging}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: paymentbot
+  namespace: default
+spec:
+  podSelector:
+    matchLabels: {app: paymentbot}
+  policyTypes: [Ingress, Egress]
+  egress:
+  - to:
+    - podSelector:
+        matchLabels: {app: postgres}
+    ports: [{protocol: TCP, port: 5432}]
+  - to:
+    - namespaceSelector:
+        matchLabels: {kubernetes.io/metadata.name: kube-system}
+      podSelector:
+        matchLabels: {k8s-app: kube-dns}
+    ports: [{protocol: UDP, port: 53}, {protocol: TCP, port: 53}]
